@@ -58,26 +58,62 @@ class Settings_Window(ctk.CTkToplevel):
         self.attributes('-type', 'dialog')
         # self.minsize('300x400')
         self.geometry('600x800')
-        self.rowconfigure(0,weight=1)
+        self.columnconfigure(4,weight=1)
 
-        self.exit  = ctk.CTkButton(self,text='x',fg_color='black',command=self.destroy).pack(anchor='e')
+        self.exit  = ctk.CTkButton(self,text='x',fg_color='black',command=self.destroy)
+        self.exit.grid(row=0,column=4 ,sticky='ne')
         
-        self.dpi_label = ctk.CTkLabel(self,text='Default')
-        self.dpi_label.pack(padx=10, pady=10)
-        self.dpi_scale = ctk.CTkSlider(self,from_=1, to=3, number_of_steps=6,command=self.set_dpi)
-        self.dpi_scale.pack(padx=10,pady=10)
-        
-        self.testo = ctk.CTkButton(self,text='Apply',command=self.apply).pack()
+        self.dpi_label = ctk.CTkLabel(self,text='Default Dpi')
+        self.dpi_label.grid(row=1,column=1 ,padx=10, pady=10)
 
+        
+        # DPI Scale
+        self.dpi_scale = ctk.CTkSlider(self, from_=0, to=3, number_of_steps=6, state='disabled', command=self.set_dpi)
+        self.dpi_scale.grid(row=2,column=1 ,padx=5, pady=5)
+
+
+        #switch
+        self.swtich_var = ctk.IntVar(value=0)
+        self.dpi_enabler = ctk.CTkSwitch(self, variable=self.swtich_var,onvalue=1, offvalue=0 ,command=self.dpi_switch,text='Enable DPI')
+        self.dpi_enabler.grid(row=2,column=3 ,padx=10, pady=10)
+
+        self.splash_label = ctk.CTkLabel(self,text='Splash')
+        self.splash_label.grid(row=3,column=1 ,padx=5, pady=5)
+
+
+
+        # Apply Button
+        self.apply_button = ctk.CTkButton(self, text='Apply', command=self.apply)
+        self.apply_button.grid(row=8,column=3 ,padx=10, pady=10)
+        
+
+
+    
+    # Enables or Disables dpi scaling
+    def dpi_switch(self):
+        if self.swtich_var.get() == 0:
+            self.dpi_scale.configure(state='disabled')
+            self.dpi_label.configure(text='Default Dpi')
+        elif self.swtich_var.get() == 1:
+            self.dpi_scale.configure(state='normal')
+               
+
+        print(self.swtich_var,self.dpi_scale._state)
+
+        
     def set_dpi(self,value):
-        self.dpi_label.configure(text=value)
-        print(value)
+        self.dpi_label.configure(text=f'Dpi:{value}')
+        
 
     def apply(self):
-        pass
-
-        # self.wscaling =  ctk.set_widget_scaling(1)  # widget dimensions and text size
-        # self.scaling = ctk.set_window_scaling(1)
+        value = self.dpi_scale.get()
+        #print(self.dpi_scale._state)
+        
+        #Allows to set Dpi
+        if self.swtich_var.get() == 1:
+            self.wscaling =  ctk.set_widget_scaling(value)  # widget dimensions and text size
+            self.scaling = ctk.set_window_scaling(value)
+        
     
 
 
