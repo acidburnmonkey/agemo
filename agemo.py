@@ -1,5 +1,23 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
+import json
+
+
+class SharedData:
+    def __init__(self):
+        self.data = self.load_settings()
+
+    def load_settings(self):
+        try:
+            with open('agemo.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            print(f"Error: Configuration file not found.")
+            return {}
+        except json.JSONDecodeError:
+            print(f"Error: Malformed JSON in.")
+            return {}
+
 
 class Main_Frame(ctk.CTk):
     def __init__(self):
@@ -7,13 +25,19 @@ class Main_Frame(ctk.CTk):
 
         #General settings
         # self.attributes('-type', 'window')
-        # self.geometry('1000x1400')
         self.columnconfigure(0, weight=1)
+    
+        # hdpi settings
+        self.file_data = SharedData()
+        
+        if self.file_data.data['dpi']:
+            self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
+            self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
+
 
         ## Widgets
         #top menu bar
         self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
-        
 
 
 class Top_bar(ctk.CTkFrame):
@@ -54,40 +78,50 @@ class Top_bar(ctk.CTkFrame):
 class Settings_Window(ctk.CTkToplevel):
     def __init__(self,parent):
         super().__init__(parent)
+        
+        self.file_data = SharedData()
 
         self.attributes('-type', 'dialog')
-        # self.minsize('300x400')
-        self.geometry('600x800')
-        self.columnconfigure(4,weight=1)
-
+        self.columnconfigure((6,1),weight=1)
+        
+        #exit button
         self.exit  = ctk.CTkButton(self,text='x',fg_color='black',command=self.destroy)
-        self.exit.grid(row=0,column=4 ,sticky='ne')
+        self.exit.grid(row=0,column=6,sticky='ne')
         
         self.dpi_label = ctk.CTkLabel(self,text='Default Dpi')
         self.dpi_label.grid(row=1,column=1 ,padx=10, pady=10)
-
-        
         # DPI Scale
         self.dpi_scale = ctk.CTkSlider(self, from_=0, to=3, number_of_steps=6, state='disabled', command=self.set_dpi)
         self.dpi_scale.grid(row=2,column=1 ,padx=5, pady=5)
 
-
         #switch
         self.swtich_var = ctk.IntVar(value=0)
         self.dpi_enabler = ctk.CTkSwitch(self, variable=self.swtich_var,onvalue=1, offvalue=0 ,command=self.dpi_switch,text='Enable DPI')
-        self.dpi_enabler.grid(row=2,column=3 ,padx=10, pady=10)
+        self.dpi_enabler.grid(row=2,column=2 ,padx=10, pady=10)
+        
 
+        if self.file_data.data['dpi']:
+            self.swtich_var.set(1)
+            self.dpi_scale._state = 'normal'
+
+        #Splash
         self.splash_label = ctk.CTkLabel(self,text='Splash')
         self.splash_label.grid(row=3,column=1 ,padx=5, pady=5)
-
+        self.splash_options = ctk.CTkOptionMenu(self,values=['disabled','enabled'])
+        self.splash_options.grid(row=3,column=2 ,padx=5, pady=10)
+        
+        #IPc
+        self.ipc_label = ctk.CTkLabel(self,text='Ipc')
+        self.ipc_label.grid(row=3,column=3 ,padx=5, pady=5)
+        self.ipc_options = ctk.CTkOptionMenu(self,values=['disabled','enabled'])
+        self.ipc_options.grid(row=3,column=4 ,padx=10, pady=10)
 
 
         # Apply Button
         self.apply_button = ctk.CTkButton(self, text='Apply', command=self.apply)
-        self.apply_button.grid(row=8,column=3 ,padx=10, pady=10)
+        self.apply_button.grid(row=8,column=2 ,padx=10, pady=10)
         
-
-
+        
     
     # Enables or Disables dpi scaling
     def dpi_switch(self):
@@ -99,11 +133,13 @@ class Settings_Window(ctk.CTkToplevel):
                
 
         print(self.swtich_var,self.dpi_scale._state)
+        self.columnconfigure(4,weight=1)
 
         
     def set_dpi(self,value):
         self.dpi_label.configure(text=f'Dpi:{value}')
         
+    
 
     def apply(self):
         value = self.dpi_scale.get()
@@ -113,7 +149,17 @@ class Settings_Window(ctk.CTkToplevel):
         if self.swtich_var.get() == 1:
             self.wscaling =  ctk.set_widget_scaling(value)  # widget dimensions and text size
             self.scaling = ctk.set_window_scaling(value)
-        
+            self.file_data.data['dpi'] = value
+
+        elif self.swtich_var.get() == 0:
+            self.file_data.data['dpi'] = None
+
+
+        # write to config file
+        with open('agemo.json','w') as f:
+            json.dump(self.file_data.data,f, indent=4)
+
+            
     
 
 
