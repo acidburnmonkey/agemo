@@ -1,7 +1,10 @@
 {
-    "monitors": [],
+    "monitors": [
+        "DP-4",
+        "DP-5"
+    ],
     "splash": false,
     "ipc": true,
     "dpi": null,
-    "wallpapers_dir": "sample"
+    "wallpapers_dir": null
 }

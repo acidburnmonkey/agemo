@@ -1,11 +1,12 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 import json
-
+import subprocess
 
 class SharedData:
     def __init__(self):
         self.data = self.load_settings()
+        self.check_monitors()
 
     def load_settings(self):
         try:
@@ -17,6 +18,19 @@ class SharedData:
         except json.JSONDecodeError:
             print(f"Error: Malformed JSON in.")
             return {}
+    
+    def check_monitors(self):
+        try:
+            hypr_ctl = subprocess.run(['hyprctl','monitors','-j'], stdout=subprocess.PIPE, text=True)
+            hold = json.loads(hypr_ctl.stdout)
+            
+            # returns list of monitor names 
+            monitors = [m.get('name') for m in hold] 
+            self.data['monitors'] = monitors
+
+        except Exception as e:
+            print(e)
+
 
 
 class Main_Frame(ctk.CTk):
@@ -100,9 +114,6 @@ class Settings_Window(ctk.CTkToplevel):
         self.dpi_enabler.grid(row=2,column=2 ,padx=10, pady=10)
         
 
-        if self.file_data.data['dpi']:
-            self.swtich_var.set(1)
-            self.dpi_scale._state = 'normal'
 
         #Splash
         self.splash_label = ctk.CTkLabel(self,text='Splash')
@@ -113,7 +124,7 @@ class Settings_Window(ctk.CTkToplevel):
         #IPc
         self.ipc_label = ctk.CTkLabel(self,text='Ipc')
         self.ipc_label.grid(row=3,column=3 ,padx=5, pady=5)
-        self.ipc_options = ctk.CTkOptionMenu(self,values=['disabled','enabled'])
+        self.ipc_options = ctk.CTkOptionMenu(self,values=['enabled','disabled'])
         self.ipc_options.grid(row=3,column=4 ,padx=10, pady=10)
 
 
@@ -121,6 +132,17 @@ class Settings_Window(ctk.CTkToplevel):
         self.apply_button = ctk.CTkButton(self, text='Apply', command=self.apply)
         self.apply_button.grid(row=8,column=2 ,padx=10, pady=10)
         
+        # Reading from json
+        if self.file_data.data['dpi']:
+            self.swtich_var.set(1)
+            self.dpi_scale._state = 'normal'
+
+        if self.file_data.data['ipc'] == False:
+            self.ipc_options.set('disabled')
+
+        if self.file_data.data['splash']:
+            self.splash_options.set('enabled')
+
         
     
     # Enables or Disables dpi scaling
@@ -132,7 +154,6 @@ class Settings_Window(ctk.CTkToplevel):
             self.dpi_scale.configure(state='normal')
                
 
-        print(self.swtich_var,self.dpi_scale._state)
         self.columnconfigure(4,weight=1)
 
         
@@ -153,8 +174,19 @@ class Settings_Window(ctk.CTkToplevel):
 
         elif self.swtich_var.get() == 0:
             self.file_data.data['dpi'] = None
+        
+        # IPC
+        if self.ipc_options.get() == 'enabled':
+            self.file_data.data['ipc'] = True 
+        else:
+            self.file_data.data['ipc'] = False 
 
-
+        #Splash
+        if self.splash_options.get() == 'enabled':
+            self.file_data.data['splash'] = True 
+        else:
+            self.file_data.data['splash'] = False 
+        
         # write to config file
         with open('agemo.json','w') as f:
             json.dump(self.file_data.data,f, indent=4)
