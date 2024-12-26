@@ -2,11 +2,14 @@ import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 import json
 import subprocess
+import thumnailer
 
 class SharedData:
     def __init__(self):
         self.data = self.load_settings()
         self.check_monitors()
+        
+        self.thumbnails_data = self.load_thubnailer_data()
 
     def load_settings(self):
         try:
@@ -31,7 +34,16 @@ class SharedData:
         except Exception as e:
             print(e)
 
-
+    def load_thubnailer_data(self):
+        try:
+            with open('thumbnail_cache.json', 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            print(f"Error: Configuration file not found.")
+            return {}
+        except json.JSONDecodeError:
+            print(f"Error: Malformed JSON in.")
+            return {}
 
 class Main_Frame(ctk.CTk):
     def __init__(self):
@@ -40,26 +52,48 @@ class Main_Frame(ctk.CTk):
         #General settings
         # self.attributes('-type', 'window')
         self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
     
-        # hdpi settings
+        # thumnailer.ligma()
+
+        # intantiate Json files
         self.file_data = SharedData()
         
         if self.file_data.data['dpi']:
             self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
             self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
-
-
+         
+        
         ## Widgets
         #top menu bar
         self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
 
+        self.gallery_frame = Gallery(self).grid(column=0 , row=1, sticky='wens')
 
+
+
+class Gallery(ctk.CTkScrollableFrame):
+    def __init__(self,parent):
+        super().__init__(parent)
+        
+        # add widgets onto the frame...
+        self.label = ctk.CTkLabel(self)
+        self.label.grid(row=0, column=0, padx=20)
+        
+
+
+
+
+
+
+
+#### top bar
 class Top_bar(ctk.CTkFrame):
     def __init__(self,parent):
         super().__init__(parent)
         
         self.settings = ctk.CTkButton(self, text= "settings",command=self.call_settings).pack(side='left',padx=10)
-        self.sources = ctk.CTkButton(self, text= "Srources").pack(side='left',padx=10)
+        self.sources = ctk.CTkButton(self, text= "Srources",command=self.getdir).pack(side='left',padx=10)
         self.about = ctk.CTkButton(self, text= "About",command=self.aboutf).pack(side='left',padx=10)
         self.ex = ctk.CTkButton(self, text= 'X', fg_color='black' ,command=self.kill).pack(anchor='e')
         
@@ -72,12 +106,11 @@ class Top_bar(ctk.CTkFrame):
         else:
             self.settings_window.focus()
 
-
     #quit app
     def kill(self):
         app.quit()
     
-
+    
     #About Popup
     def aboutf(self):
         message = '''
@@ -85,7 +118,9 @@ class Top_bar(ctk.CTkFrame):
         https://github.com/acidburnmonkey/agemo
         '''
         CTkMessagebox(self,title="About",wraplength=9000000 ,icon='assets/agemo.png',message=message)
-
+    
+    def getdir(self):
+        ctk.filedialog.askdirectory()
 
 
 #This is the settings window pop up 
@@ -143,7 +178,6 @@ class Settings_Window(ctk.CTkToplevel):
         if self.file_data.data['splash']:
             self.splash_options.set('enabled')
 
-        
     
     # Enables or Disables dpi scaling
     def dpi_switch(self):
@@ -153,14 +187,12 @@ class Settings_Window(ctk.CTkToplevel):
         elif self.swtich_var.get() == 1:
             self.dpi_scale.configure(state='normal')
                
-
         self.columnconfigure(4,weight=1)
 
         
     def set_dpi(self,value):
         self.dpi_label.configure(text=f'Dpi:{value}')
         
-    
 
     def apply(self):
         value = self.dpi_scale.get()
@@ -191,8 +223,6 @@ class Settings_Window(ctk.CTkToplevel):
         with open('agemo.json','w') as f:
             json.dump(self.file_data.data,f, indent=4)
 
-            
-    
 
 
 if __name__ == '__main__':

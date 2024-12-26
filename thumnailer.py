@@ -30,7 +30,7 @@ def generate_thumbnail(image_info):
     try:
         # Determine thumbnail path
         base_name = os.path.basename(image_path)
-        thumbnail_path = os.path.join(output_dir, f"thumb_{base_name}")
+        thumbnail_path = os.path.join(os.path.abspath(output_dir), f"thumb_{base_name}")
 
         # Check cache and modification times
         if thumbnail_path in valid_cache and valid_cache[thumbnail_path] == image_path:
