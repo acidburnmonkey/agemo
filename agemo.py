@@ -55,6 +55,7 @@ class Main_Frame(ctk.CTk):
         super().__init__()
 
         #General settings
+        self.wm_attributes('-alpha',True)
         # self.attributes('-type', 'window')
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -72,10 +73,11 @@ class Main_Frame(ctk.CTk):
         ## Widgets
         #top menu bar
         self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
-
+        
         self.gallery_frame = Gallery(self)
         self.gallery_frame.grid(column=0 , row=1, sticky='wens')
 
+    
 
 class Gallery(ctk.CTkScrollableFrame):
     def __init__(self, parent):
@@ -88,6 +90,7 @@ class Gallery(ctk.CTkScrollableFrame):
         #click vars
         self.image_refs = {}
         self.current_image_index = ctk.IntVar(value=-1)
+        self.labels = []
 
         self.columnconfigure((0,1,2,3), weight=1, uniform='fred')
         self.rowconfigure((0,1,2,3), weight=1, uniform='fred')
@@ -113,18 +116,32 @@ class Gallery(ctk.CTkScrollableFrame):
             self.image_refs[index] = photo
             
             # Dynamic label generation for image
-            self.label = ctk.CTkLabel(self, image=photo,text="", )
-            self.label.grid(row=index // 4 ,column=index % 4 ,padx=5, pady=5 ,sticky='wens')
+            label = ctk.CTkLabel(self, image=photo,text="", )
+            label.grid(row=index // 4 ,column=index % 4 ,padx=5, pady=5 ,sticky='wens')
+            self.labels.append(label)
 
-            self.label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
+            label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
 
     def image_clicked(self, index):
-        # Update the currently clicked image index
-        self.current_image_index.set(index)
-        print(f"Image {index} clicked")
+        # Get the clicked label
+        clicked_label = self.labels[index]
 
+        # Remove any previously placed button (if needed)
+        if hasattr(self, 'overlay_image') and self.overlay_image.winfo_exists():
+            self.overlay_image.destroy()
 
+        # Create a button and place it over the clicked image
+        image = Image.open('assets/salomon.png')
+        photo = ctk.CTkImage(light_image=image, dark_image=image, size=(300,300))
+        self.overlay_image = ctk.CTkLabel(self, text='',image=photo)
 
+        # Get the grid info of the clicked label
+        grid_info = clicked_label.grid_info()
+
+        # Place the button in the same grid cell as the clicked label
+        self.overlay_image.grid( row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
+
+    
 
 
 
@@ -189,7 +206,6 @@ class Settings_Window(ctk.CTkToplevel):
         self.dpi_enabler = ctk.CTkSwitch(self, variable=self.swtich_var,onvalue=1, offvalue=0 ,command=self.dpi_switch,text='Enable DPI')
         self.dpi_enabler.grid(row=2,column=2 ,padx=10, pady=10)
         
-
 
         #Splash
         self.splash_label = ctk.CTkLabel(self,text='Splash')
