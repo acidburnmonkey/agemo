@@ -1,7 +1,9 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
+from PIL import Image, ImageOps
 import json
 import subprocess
+
 import thumnailer
 
 class SharedData:
@@ -45,6 +47,9 @@ class SharedData:
             print(f"Error: Malformed JSON in.")
             return {}
 
+
+        
+# APP MAin Logic
 class Main_Frame(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -68,19 +73,55 @@ class Main_Frame(ctk.CTk):
         #top menu bar
         self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
 
-        self.gallery_frame = Gallery(self).grid(column=0 , row=1, sticky='wens')
-
+        self.gallery_frame = Gallery(self)
+        self.gallery_frame.grid(column=0 , row=1, sticky='wens')
 
 
 class Gallery(ctk.CTkScrollableFrame):
-    def __init__(self,parent):
-        super().__init__(parent)
+    def __init__(self, parent):
+        super().__init__(parent, width=3200, height=2600)
         
-        # add widgets onto the frame...
-        self.label = ctk.CTkLabel(self)
-        self.label.grid(row=0, column=0, padx=20)
-        
+        # Load thumbnails path from JSON
+        self.json = SharedData()
+        self.image_paths = [images for images in self.json.thumbnails_data.keys()]
 
+        #click vars
+        self.image_refs = {}
+        self.current_image_index = ctk.IntVar(value=-1)
+
+        self.columnconfigure((0,1,2,3), weight=1, uniform='fred')
+        self.rowconfigure((0,1,2,3), weight=1, uniform='fred')
+
+        # Dynamic row configuration
+        self.load_gallery()
+
+        #Scroll Wheel
+        self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
+        self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
+
+        
+    def load_gallery(self):
+
+        for index, image_path in enumerate(self.image_paths):
+            # Load and resize the image
+            image = Image.open(image_path)
+            # image = ImageOps.expand(image,border=10, fill="white")
+            photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600,600))
+
+
+            # Save image reference to prevent garbage collection
+            self.image_refs[index] = photo
+            
+            # Dynamic label generation for image
+            self.label = ctk.CTkLabel(self, image=photo,text="", )
+            self.label.grid(row=index // 4 ,column=index % 4 ,padx=5, pady=5 ,sticky='wens')
+
+            self.label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
+
+    def image_clicked(self, index):
+        # Update the currently clicked image index
+        self.current_image_index.set(index)
+        print(f"Image {index} clicked")
 
 
 
