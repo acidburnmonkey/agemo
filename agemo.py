@@ -10,7 +10,6 @@ class SharedData:
     def __init__(self):
         self.data = self.load_settings()
         self.check_monitors()
-        
         self.thumbnails_data = self.load_thubnailer_data()
 
     def load_settings(self):
@@ -23,7 +22,7 @@ class SharedData:
         except json.JSONDecodeError:
             print(f"Error: Malformed JSON in.")
             return {}
-    
+
     def check_monitors(self):
         try:
             hypr_ctl = subprocess.run(['hyprctl','monitors','-j'], stdout=subprocess.PIPE, text=True)
@@ -32,6 +31,10 @@ class SharedData:
             # returns list of monitor names 
             monitors = [m.get('name') for m in hold] 
             self.data['monitors'] = monitors
+ 
+            # Auto populate Monitors
+            with open('agemo.json','w') as f:
+                json.dump(self.data,f, indent=4)
 
         except Exception as e:
             print(e)
@@ -49,7 +52,7 @@ class SharedData:
 
 
         
-# APP MAin Logic
+# APP Main Logic
 class Main_Frame(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -64,6 +67,7 @@ class Main_Frame(ctk.CTk):
 
         # intantiate Json files
         self.file_data = SharedData()
+        self.file_data.check_monitors()
         
         if self.file_data.data['dpi']:
             self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
@@ -74,17 +78,22 @@ class Main_Frame(ctk.CTk):
         #top menu bar
         self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
         
-        self.gallery_frame = Gallery(self)
+        self.gallery_frame = Gallery(self,self.file_data)
         self.gallery_frame.grid(column=0 , row=1, sticky='wens')
+        
+
+        self.bottom_bar = Bottom_Bar(self, self.gallery_frame,self.file_data)
+        self.bottom_bar.grid(column=0 , row=2, sticky='we')
+
 
     
-
+# Gallery Fame
 class Gallery(ctk.CTkScrollableFrame):
-    def __init__(self, parent):
+    def __init__(self, parent,shared_data):
         super().__init__(parent, width=3200, height=2600)
         
         # Load thumbnails path from JSON
-        self.json = SharedData()
+        self.json = shared_data
         self.image_paths = [images for images in self.json.thumbnails_data.keys()]
 
         #click vars
@@ -106,7 +115,7 @@ class Gallery(ctk.CTkScrollableFrame):
     def load_gallery(self):
 
         for index, image_path in enumerate(self.image_paths):
-            # Load and resize the image
+
             image = Image.open(image_path)
             # image = ImageOps.expand(image,border=10, fill="white")
             photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600,600))
@@ -141,7 +150,77 @@ class Gallery(ctk.CTkScrollableFrame):
         # Place the button in the same grid cell as the clicked label
         self.overlay_image.grid( row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
 
+
+
+# Bottom bar 
+class Bottom_Bar(ctk.CTkFrame):
+    def __init__(self,parent,gallery_instance,shared_data):
+        super().__init__(parent)
+        
+        #Json
+        self.file_data = shared_data
+
+        self.gallery = gallery_instance
+
+
+        # Widgets
+        self.settings = ctk.CTkButton(self, text= "Apply").pack(side='left',padx=30)
+        
+        self.sources = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors'] ]).pack(side='left',padx=30)
+        
+        self.about = ctk.CTkButton(self, text= "About").pack(side='left',padx=30)
+        
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -181,7 +260,7 @@ class Top_bar(ctk.CTkFrame):
         ctk.filedialog.askdirectory()
 
 
-#This is the settings window pop up 
+# settings window pop up 
 class Settings_Window(ctk.CTkToplevel):
     def __init__(self,parent):
         super().__init__(parent)
