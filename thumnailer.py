@@ -17,12 +17,22 @@ def load_cache():
             return {}
     return {}
 
-
 def save_cache(cache):
-    """Save the updated cache to a file."""
-    with open(CACHE_FILE, "w") as f:
-        json.dump(cache, f, indent=4)
+    """
+    Save the updated cache to a file, sorted by modification date (newest to oldest).
+    """
+    # Sort the cache by modification date
+    sorted_cache = dict(
+        sorted(
+            cache.items(),
+            key=lambda item: item[1][1],  # Sort by the modification date (second value in list)
+            reverse=True  # Newest to oldest
+        )
+    )
 
+    # Save the sorted cache
+    with open(CACHE_FILE, "w") as f:
+        json.dump(sorted_cache, f, indent=4)
 
 def generate_thumbnail(image_info):
     image_path, output_dir, size, valid_cache = image_info
@@ -33,19 +43,18 @@ def generate_thumbnail(image_info):
         thumbnail_path = os.path.join(os.path.abspath(output_dir), f"thumb_{base_name}")
 
         # Check cache and modification times
-        if thumbnail_path in valid_cache and valid_cache[thumbnail_path] == image_path:
+        if thumbnail_path in valid_cache and valid_cache[thumbnail_path][0] == image_path:
             try:
                 if os.path.getmtime(image_path) <= os.path.getmtime(thumbnail_path):
                     return f"Thumbnail exists in cache: {thumbnail_path}"
             except FileNotFoundError:
-                pass  # Proceed to generate the thumbnail if files are missing
+                pass  
 
         # Generate thumbnail
         with Image.open(image_path) as img:
             # Create the output directory if it doesn't exist
             os.makedirs(output_dir, exist_ok=True)
 
-            # Remove alpha channel or palette if necessary
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
 
@@ -57,14 +66,15 @@ def generate_thumbnail(image_info):
             save_format = "JPEG" if ext in [".jpg", ".jpeg"] else "PNG"
             img.save(thumbnail_path, save_format)
 
-            # Update cache
-            valid_cache[thumbnail_path] = image_path
+            # Update cache with real path and modification date
+            valid_cache[thumbnail_path] = [
+                image_path,
+                os.path.getmtime(image_path)  # Modification date
+            ]
             return f"Thumbnail created: {thumbnail_path}"
 
     except Exception as e:
         return f"Error processing {image_path}: {e}"
-
-
 
 def process_images(image_paths, output_dir, size=(720, 720)):
     """
@@ -78,7 +88,7 @@ def process_images(image_paths, output_dir, size=(720, 720)):
     # Load the cache
     valid_cache = load_cache()
 
-   # Clean the cache
+    # Clean the cache
     clean_cache(valid_cache)
 
     # Use multiprocessing with a shared cache manager
@@ -92,18 +102,14 @@ def process_images(image_paths, output_dir, size=(720, 720)):
         valid_cache.update(shared_cache)
         save_cache(valid_cache)
 
-    #debug
-    # for result in results:
-    #     print(result)
-
-
 def clean_cache(cache):
     """
     Clean up the cache by removing entries for images or thumbnails that no longer exist.
     """
     to_remove = []
 
-    for thumbnail_path, image_path in cache.items():
+    for thumbnail_path, metadata in cache.items():
+        image_path = metadata[0]  # Get the real image path
         if not os.path.exists(image_path) or not os.path.exists(thumbnail_path):
             # Mark cache entry for removal
             to_remove.append(thumbnail_path)
@@ -118,34 +124,33 @@ def clean_cache(cache):
 
     print(f"Cache cleaned. {len(to_remove)} entries removed.")
 
-
-#  check if a file is a valid image
 def is_image(file_path):
+    """
+    Check if a file is a valid image.
+    """
     try:
         with Image.open(file_path):
             return True
     except Exception:
         return False
 
-
-# Main fucntion to call from the gui 
-def ligma(wallpappers_dir):
+def ligma(wallpapers_dir):
     """
-    source dir will be from file selector
+    Generate thumbnails and sort them by modification date.
     """
-    source_dir = wallpappers_dir
+    source_dir = wallpapers_dir
     image_paths = [
         os.path.abspath(os.path.join(source_dir, file))
         for file in os.listdir(source_dir)
         if is_image(os.path.join(source_dir, file))
     ]
-    
-    #thumbnails
-    output_dir = os.path.join(os.path.dirname(__file__),'thumbnails')
+
+    # Thumbnails directory
+    output_dir = os.path.join(os.path.dirname(__file__), 'thumbnails')
 
     # Generate thumbnails
     process_images(image_paths, output_dir)
 
-
 if __name__ == "__main__":
     print('ligma is the main function')
+   # ligma('src')

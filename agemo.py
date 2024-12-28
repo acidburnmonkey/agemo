@@ -239,7 +239,10 @@ class Bottom_Bar(ctk.CTkFrame):
         if current_index != -1:
             # Retrieve the image last clicked as key
             clicked_image = self.gallery.labels[current_index].image_path
-            real_path = self.file_data.thumbnails_data.get(clicked_image)
+            real_path = self.file_data.thumbnails_data.get(clicked_image)[0]
+            
+            # Debug
+            print(real_path)
             
             if (self.mw_var.get() !='Monitors'):
 
