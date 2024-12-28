@@ -1,3 +1,10 @@
+#!/bin/python3
+
+#
+#  https://github.com/acidburnmonkey
+#
+
+
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
 from PIL import Image

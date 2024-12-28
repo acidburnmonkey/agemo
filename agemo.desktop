@@ -1,0 +1,19 @@
+[Desktop Entry]
+
+Type=Application
+Version=1.0
+
+Name=Agemo
+
+# A comment which can/will be used as a tooltip
+Comment=Wallpaper GUI
+
+# The executable of the application, possibly with arguments.
+Exec=python3 {}/.local/share/agemo/agemo.py
+
+# The name of the icon that will be used to display this entry
+Icon={}/.local/share/agemo/assets/agemo.svg
+
+# Describes whether this application needs to be run in a terminal or not
+Terminal=false
+
