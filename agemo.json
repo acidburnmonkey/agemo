@@ -1,8 +1,5 @@
 {
-    "monitors": [
-        "DP-4",
-        "DP-5"
-    ],
+    "monitors": [ ],
     "splash": false,
     "ipc": true,
     "dpi": null,
