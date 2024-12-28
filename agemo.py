@@ -64,11 +64,11 @@ class Main_Frame(ctk.CTk):
         super().__init__()
 
         #General settings
-        self.wm_attributes('-alpha',True)
-        # self.attributes('-type', 'window')
+        self.attributes('-type', 'window')
+        self.title("Agemo")
+
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
-    
 
         # intantiate Json files
         self.file_data = SharedData()
@@ -352,7 +352,7 @@ class Settings_Window(ctk.CTkToplevel):
             self.file_data.data['splash'] = False 
         
         # write to config file
-        with open('agemo.json','w') as f:
+        with open(os.path.join(self.file_data.script_path,'agemo.json'), 'w') as f:
             json.dump(self.file_data.data,f, indent=4)
 
 

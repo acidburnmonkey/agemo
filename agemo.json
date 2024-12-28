@@ -1,10 +1,7 @@
 {
-    "monitors": [
-        "DP-4",
-        "DP-5"
-    ],
+    "monitors": [ ],
     "splash": false,
     "ipc": true,
-    "dpi": 1.5,
-    "wallpapers_dir": "/home/mahalo/repos/agemo/images"
+    "dpi": null,
+    "wallpapers_dir": []
 }
