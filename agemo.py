@@ -109,41 +109,81 @@ class Main_Frame(ctk.CTk):
 
 
     
-### Gallery Frame
 class Gallery(ctk.CTkScrollableFrame):
     def __init__(self, parent, shared_data):
         super().__init__(parent, width=3200, height=2600)
-        # Load thumbnails path from JSON
+        
+
         self.json = shared_data
-        self.image_paths = [images for images in self.json.thumbnails_data.keys()]
-        # Click vars
-        self.image_refs = {}
-        self.current_image_index = ctk.IntVar(value=-1)  # Store the index of the last clicked image
-        self.labels = []
-        self.columnconfigure((0, 1, 2, 3), weight=1, uniform='fred')
-        self.rowconfigure((0, 1, 2, 3), weight=1, uniform='fred')
-        # Dynamic row configuration
-        self.load_gallery()
+        self.image_paths = list(self.json.thumbnails_data.keys())
+        self.current_batch_index = 0  
+        self.batch_size = 40  
+        self.labels = []  # Store references to labels for the images
+        self.current_image_index = ctk.IntVar(value=-1) 
+
+        self.columnconfigure((0, 1, 2, 3), weight=1, uniform="batch") 
+        self.rowconfigure((0, 1, 2, 3), weight=1, uniform="batch")  
+
+        # Load the first batch
+        self.load_batch(self.current_batch_index)
+
+        # Button for loading more images
+        self.load_more_button = ctk.CTkButton( self, text="Load More", command=self.load_next_batch)
+        self.update_button_position()  # Position the button dynamically
+ 
         # Scroll Wheel
         self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
         self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
 
- 
-    def load_gallery(self):
-        
-        for index, image_path in enumerate(self.image_paths):
-            image = Image.open(image_path)
-            
-            photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600, 600))
-            self.image_refs[index] = photo
-        
-            # Create label and store image_path as an attribute
-            label = ctk.CTkLabel(self, image=photo, text="")
-            label.image_path = image_path  # Store the image path in the label
-            label.grid(row=index // 4, column=index % 4, padx=5, pady=5, sticky='wens')
-            
-            self.labels.append(label)
-            label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
+  
+    def load_batch(self, batch_index):
+        """
+        Load a specific batch of images.
+        """
+        start_index = batch_index * self.batch_size
+        end_index = min(start_index + self.batch_size, len(self.image_paths))
+
+        print(f"Loading batch {batch_index}: Images {start_index} to {end_index - 1}")  # Debugging line
+        for index in range(start_index, end_index):
+            try:
+                image_path = self.image_paths[index]
+                image = Image.open(image_path)
+                photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600, 600))
+
+                label = ctk.CTkLabel(self, image=photo, text=f"Image {index}")
+                label.grid(
+                    row=index // 4 % self.batch_size, column=index % 4, padx=5, pady=5, sticky="wens"
+                )
+                label.image_path = image_path  # Attach the image path to the label
+                self.labels.append(label)
+
+                # Bind click event to the label
+                label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
+
+            except Exception as e:
+                print(f"Error loading image {index}: {e}")  # Debugging line
+
+
+    def load_next_batch(self):
+        """
+        Load the next batch of images.
+        """
+        self.current_batch_index += 1
+        if self.current_batch_index * self.batch_size < len(self.image_paths):
+            self.load_batch(self.current_batch_index)
+            self.update_button_position()  # Reposition the button
+        else:
+            self.load_more_button.configure(text="No More Images", state="disabled")
+
+    def update_button_position(self):
+        """
+        Update the position of the "Load More" button.
+        """
+        button_row = (self.current_batch_index + 1) * (self.batch_size // 4)
+        print(f"Button row: {button_row}")  # Debugging line
+        self.load_more_button.grid(row=button_row, column=0, columnspan=4, pady=10)
+
+
 
 
     def image_clicked(self, index):
@@ -212,8 +252,6 @@ class Bottom_Bar(ctk.CTkFrame):
                 #print(real_path, '        ', self.mw_var.get())
         
         
-
-
 
 
 #### top bar
