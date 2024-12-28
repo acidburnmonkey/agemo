@@ -1,5 +1,5 @@
 import re
-from pathlib import Path
+import os
 from CTkMessagebox import CTkMessagebox
 
 
@@ -8,8 +8,9 @@ class HyprParser:
 
     @classmethod
     def hypr_reader(cls):
-
-        config_file = str( Path.home()) + '/.config/hypr/hyprpaper.conf' 
+    
+        home = os.getlogin()
+        config_file = os.path.join(home,'/.config/hypr/hyprpaper.conf')
         
         with open(config_file, 'r') as file:
             config = file.read()
@@ -38,7 +39,9 @@ class HyprParser:
     @classmethod
     def hypr_write(cls,image_path, target_monitor):
 
-        config_file = str( Path.home()) + '/.config/hypr/hyprpaper.conf' 
+        home = os.path.expanduser('~')
+        config_file = os.path.join(home,'.config','hypr' ,'hyprpaper.conf')
+        print(config_file)
 
         try:
             with open(config_file, 'r') as file:
@@ -70,7 +73,7 @@ class HyprParser:
             preloads.add(image_path)  # Ensure the new wallpaper is preloaded
 
             # Write the updated configuration back to the file
-            with open('hyprpaper.conf', 'w') as file:
+            with open(config_file, 'w') as file:
                 # Write updated preload entries
                 for preload_path in sorted(preloads):  
                     file.write(f"preload= {preload_path}\n")
@@ -88,4 +91,11 @@ class HyprParser:
         except  FileNotFoundError:
             CTkMessagebox(title="Error", icon="warning", message="hyprpaper.conf file not found")
             return False
+        except Exception as e:
+            print(e)
+            return False
 
+
+
+if __name__ =='__main__':
+        HyprParser.hypr_write('2121212','cassssssss')

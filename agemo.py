@@ -3,18 +3,25 @@ from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import json
 import subprocess
+import time
+import os
+
 
 import thumnailer
 
+
 class SharedData:
     def __init__(self):
+      
+        self.script_path = os.path.join(os.path.dirname(__file__))
         self.data = self.load_settings()
         self.check_monitors()
         self.thumbnails_data = self.load_thubnailer_data()
 
+
     def load_settings(self):
         try:
-            with open('agemo.json', 'r') as f:
+            with open(os.path.join(self.script_path,'agemo.json'), 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
             print(f"Error: Configuration file not found.")
@@ -33,7 +40,7 @@ class SharedData:
             self.data['monitors'] = monitors
  
             # Auto populate Monitors
-            with open('agemo.json','w') as f:
+            with open(os.path.join(self.script_path,'agemo.json'),'w') as f:
                 json.dump(self.data,f, indent=4)
 
         except Exception as e:
@@ -41,7 +48,7 @@ class SharedData:
 
     def load_thubnailer_data(self):
         try:
-            with open('thumbnail_cache.json', 'r') as f:
+            with open(os.path.join(self.script_path,'thumbnail_cache.json'), 'r') as f:
                 return json.load(f)
         except FileNotFoundError:
             print(f"Error: Configuration file not found.")
@@ -51,7 +58,6 @@ class SharedData:
             return {}
 
 
-        
 # APP Main Logic
 class Main_Frame(ctk.CTk):
     def __init__(self):
@@ -63,7 +69,6 @@ class Main_Frame(ctk.CTk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
     
-        thumnailer.ligma()
 
         # intantiate Json files
         self.file_data = SharedData()
@@ -74,9 +79,19 @@ class Main_Frame(ctk.CTk):
             self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
          
         
+        
+        # thumnailer.ligma()
+        
+        #thumbnailer disabled on first time setup
+        if self.file_data.data['wallpapers_dir']:
+             thumnailer.ligma(self.file_data.data['wallpapers_dir'])
+
+
+
         ## Widgets
         #top menu bar
-        self.top_bar =Top_bar(self).grid(column=0 , row=0, sticky='we')
+        self.top_bar =Top_bar(self, self.file_data)
+        self.top_bar.grid(column=0 , row=0, sticky='we')
         
         self.gallery_frame = Gallery(self,self.file_data)
         self.gallery_frame.grid(column=0 , row=1, sticky='wens')
@@ -106,31 +121,41 @@ class Gallery(ctk.CTkScrollableFrame):
         self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
         self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
 
+ 
     def load_gallery(self):
+        
         for index, image_path in enumerate(self.image_paths):
             image = Image.open(image_path)
+            
             photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600, 600))
             self.image_refs[index] = photo
+        
             # Create label and store image_path as an attribute
             label = ctk.CTkLabel(self, image=photo, text="")
             label.image_path = image_path  # Store the image path in the label
             label.grid(row=index // 4, column=index % 4, padx=5, pady=5, sticky='wens')
+            
             self.labels.append(label)
             label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
 
+
     def image_clicked(self, index):
+        
         # Update the currently clicked image index
         self.current_image_index.set(index)
         clicked_label = self.labels[index]
+        
         if hasattr(self, 'overlay_image') and self.overlay_image.winfo_exists():
             self.overlay_image.destroy()
 
         # Create a button and place it over the clicked image
         image = Image.open('assets/salomon.png')
         photo = ctk.CTkImage(light_image=image, dark_image=image, size=(300, 300))
+        
         self.overlay_image = ctk.CTkLabel(self, text='', image=photo)
         grid_info = clicked_label.grid_info()
         self.overlay_image.grid(row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
+
 
 
 
@@ -170,70 +195,27 @@ class Bottom_Bar(ctk.CTkFrame):
             real_path = self.file_data.thumbnails_data.get(clicked_image)
             
             if (self.mw_var.get() !='Monitors'):
-                print('aloha')
-            
 
-            # HyprParser.hypr_write("ada",'dasd')
+                HyprParser.hypr_write(real_path,self.mw_var.get())
+                subprocess.call(['kill','hyprpaper'])
+                time.sleep(1)
+                subprocess.Popen(['hyprpaper'])
+
+                #debug
+                #print(real_path, '        ', self.mw_var.get())
         
         
-        
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
 
 #### top bar
 class Top_bar(ctk.CTkFrame):
-    def __init__(self,parent):
+    def __init__(self,parent,shared_data):
         super().__init__(parent)
         
+        self.file_data = shared_data
+
         self.settings = ctk.CTkButton(self, text= "settings",command=self.call_settings).pack(side='left',padx=10)
         self.sources = ctk.CTkButton(self, text= "Srources",command=self.getdir).pack(side='left',padx=10)
         self.about = ctk.CTkButton(self, text= "About",command=self.aboutf).pack(side='left',padx=10)
@@ -260,9 +242,18 @@ class Top_bar(ctk.CTkFrame):
         https://github.com/acidburnmonkey/agemo
         '''
         CTkMessagebox(self,title="About",wraplength=9000000 ,icon='assets/agemo.png',message=message)
-    
+     
     def getdir(self):
-        ctk.filedialog.askdirectory()
+        
+        wallpapers_dir=  ctk.filedialog.askdirectory()
+        self.file_data.data['wallpapers_dir'] = wallpapers_dir
+        print(wallpapers_dir)
+        print (self.file_data.data['wallpapers_dir'])
+
+        # Write path of wallpapers_dir
+        with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
+            json.dump(self.file_data.data,f, indent=4)
+
 
 
 # settings window pop up 

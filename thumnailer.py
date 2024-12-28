@@ -129,7 +129,7 @@ def is_image(file_path):
 
 
 # Main fucntion to call from the gui 
-def ligma(wallpappers_dir='src',thumbnails='thumbnails'):
+def ligma(wallpappers_dir):
     """
     source dir will be from file selector
     """
@@ -139,11 +139,13 @@ def ligma(wallpappers_dir='src',thumbnails='thumbnails'):
         for file in os.listdir(source_dir)
         if is_image(os.path.join(source_dir, file))
     ]
-    output_dir = thumbnails
+    
+    #thumbnails
+    output_dir = os.path.join(os.path.dirname(__file__),'thumbnails')
 
     # Generate thumbnails
     process_images(image_paths, output_dir)
 
 
 if __name__ == "__main__":
-    ligma()
+    print('ligma is the main function')
