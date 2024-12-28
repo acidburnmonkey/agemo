@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from CTkMessagebox import CTkMessagebox
-from PIL import Image, ImageOps
+from PIL import Image
 import json
 import subprocess
 
@@ -63,7 +63,7 @@ class Main_Frame(ctk.CTk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
     
-        # thumnailer.ligma()
+        thumnailer.ligma()
 
         # intantiate Json files
         self.file_data = SharedData()
@@ -87,93 +87,98 @@ class Main_Frame(ctk.CTk):
 
 
     
-# Gallery Fame
+### Gallery Frame
 class Gallery(ctk.CTkScrollableFrame):
-    def __init__(self, parent,shared_data):
+    def __init__(self, parent, shared_data):
         super().__init__(parent, width=3200, height=2600)
-        
         # Load thumbnails path from JSON
         self.json = shared_data
         self.image_paths = [images for images in self.json.thumbnails_data.keys()]
-
-        #click vars
+        # Click vars
         self.image_refs = {}
-        self.current_image_index = ctk.IntVar(value=-1)
+        self.current_image_index = ctk.IntVar(value=-1)  # Store the index of the last clicked image
         self.labels = []
-
-        self.columnconfigure((0,1,2,3), weight=1, uniform='fred')
-        self.rowconfigure((0,1,2,3), weight=1, uniform='fred')
-
+        self.columnconfigure((0, 1, 2, 3), weight=1, uniform='fred')
+        self.rowconfigure((0, 1, 2, 3), weight=1, uniform='fred')
         # Dynamic row configuration
         self.load_gallery()
-
-        #Scroll Wheel
+        # Scroll Wheel
         self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
         self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
 
-        
     def load_gallery(self):
-
         for index, image_path in enumerate(self.image_paths):
-
             image = Image.open(image_path)
-            # image = ImageOps.expand(image,border=10, fill="white")
-            photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600,600))
-
-
-            # Save image reference to prevent garbage collection
+            photo = ctk.CTkImage(light_image=image, dark_image=image, size=(600, 600))
             self.image_refs[index] = photo
-            
-            # Dynamic label generation for image
-            label = ctk.CTkLabel(self, image=photo,text="", )
-            label.grid(row=index // 4 ,column=index % 4 ,padx=5, pady=5 ,sticky='wens')
+            # Create label and store image_path as an attribute
+            label = ctk.CTkLabel(self, image=photo, text="")
+            label.image_path = image_path  # Store the image path in the label
+            label.grid(row=index // 4, column=index % 4, padx=5, pady=5, sticky='wens')
             self.labels.append(label)
-
             label.bind("<Button-1>", lambda event, idx=index: self.image_clicked(idx))
 
     def image_clicked(self, index):
-        # Get the clicked label
+        # Update the currently clicked image index
+        self.current_image_index.set(index)
         clicked_label = self.labels[index]
-
-        # Remove any previously placed button (if needed)
         if hasattr(self, 'overlay_image') and self.overlay_image.winfo_exists():
             self.overlay_image.destroy()
 
         # Create a button and place it over the clicked image
         image = Image.open('assets/salomon.png')
-        photo = ctk.CTkImage(light_image=image, dark_image=image, size=(300,300))
-        self.overlay_image = ctk.CTkLabel(self, text='',image=photo)
-
-        # Get the grid info of the clicked label
+        photo = ctk.CTkImage(light_image=image, dark_image=image, size=(300, 300))
+        self.overlay_image = ctk.CTkLabel(self, text='', image=photo)
         grid_info = clicked_label.grid_info()
-
-        # Place the button in the same grid cell as the clicked label
-        self.overlay_image.grid( row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
+        self.overlay_image.grid(row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
 
 
 
-# Bottom bar 
+#bottom_bar
 class Bottom_Bar(ctk.CTkFrame):
-    def __init__(self,parent,gallery_instance,shared_data):
+    def __init__(self, parent, gallery_instance, shared_data):
         super().__init__(parent)
         
-        #Json
+        # Json
         self.file_data = shared_data
-
         self.gallery = gallery_instance
-
+        
 
         # Widgets
-        self.settings = ctk.CTkButton(self, text= "Apply").pack(side='left',padx=30)
+        ctk.CTkButton(self, text="Apply", command=self.apply_button).pack(side='left', padx=30)
         
-        self.sources = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors'] ]).pack(side='left',padx=30)
+
+        self.mw_var = ctk.StringVar()
+        self.mw_var.set('Monitors')
+
+        monitor_widget = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors']] ,command=self.select_monitor , variable=self.mw_var) 
+        monitor_widget.pack(side='left', padx=30)
         
-        self.about = ctk.CTkButton(self, text= "About").pack(side='left',padx=30)
+    # Debugging
+    def select_monitor(self,monitor):
+        print(f"Selected monitor: {monitor}")  
+
+    def apply_button(self):
+        from HyprParser import HyprParser
+        
+        # Check if an image has been clicked
+        current_index = self.gallery.current_image_index.get()
+
+        if current_index != -1:
+            # Retrieve the image last clicked as key
+            clicked_image = self.gallery.labels[current_index].image_path
+            real_path = self.file_data.thumbnails_data.get(clicked_image)
+            
+            if (self.mw_var.get() !='Monitors'):
+                print('aloha')
+            
+
+            # HyprParser.hypr_write("ada",'dasd')
+        
+        
         
     
-
-
-
+    
 
 
 

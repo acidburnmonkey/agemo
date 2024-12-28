@@ -92,8 +92,9 @@ def process_images(image_paths, output_dir, size=(720, 720)):
         valid_cache.update(shared_cache)
         save_cache(valid_cache)
 
-    for result in results:
-        print(result)
+    #debug
+    # for result in results:
+    #     print(result)
 
 
 def clean_cache(cache):

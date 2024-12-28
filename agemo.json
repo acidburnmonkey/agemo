@@ -5,6 +5,6 @@
     ],
     "splash": false,
     "ipc": true,
-    "dpi": null,
+    "dpi": 1.5,
     "wallpapers_dir": null
 }
