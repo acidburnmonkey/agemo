@@ -8,6 +8,13 @@
 - customtkinter
 - CTkMessagebox
 
+# Important for first run ⚠️
+- select source button and restart the application 
+- now wait , is doing work <br>
+if you have over 800 images in that directory it will take some time for the program to index them 
+it will create this file when is done : ~.local/share/agemo/thumbnail_cache.json
+
+
 ## Install
 clone the repo and run the script don’t need sudo
 ```
