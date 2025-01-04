@@ -100,17 +100,19 @@ class Main_Frame(ctk.CTk):
         self.top_bar =Top_bar(self, self.file_data)
         self.top_bar.grid(column=0 , row=0, sticky='we')
         
-        self.gallery_frame = Gallery(self,self.file_data)
+        self.gallery_frame = Gallery(self,self.file_data , None)
         self.gallery_frame.grid(column=0 , row=1, sticky='wens')
         
 
         self.bottom_bar = Bottom_Bar(self, self.gallery_frame,self.file_data)
         self.bottom_bar.grid(column=0 , row=2, sticky='we')
-
+        
+        # Link Bottom_Bar back to Gallery (janky circular link but works)
+        self.gallery_frame.bottom_button = self.bottom_bar
 
     
 class Gallery(ctk.CTkScrollableFrame):
-    def __init__(self, parent, shared_data):
+    def __init__(self, parent, shared_data, load_button):
         super().__init__(parent, width=3200, height=2600)
         
 
@@ -120,6 +122,7 @@ class Gallery(ctk.CTkScrollableFrame):
         self.batch_size = 40  
         self.labels = []  # Store references to labels for the images
         self.current_image_index = ctk.IntVar(value=-1) 
+        self.bottom_button = load_button
 
         self.columnconfigure((0, 1, 2, 3), weight=1, uniform="batch") 
         self.rowconfigure((0, 1, 2, 3), weight=1, uniform="batch")  
@@ -127,15 +130,11 @@ class Gallery(ctk.CTkScrollableFrame):
         # Load the first batch
         self.load_batch(self.current_batch_index)
 
-        # Button for loading more images
-        self.load_more_button = ctk.CTkButton( self, text="Load More", command=self.load_next_batch)
-        self.update_button_position()  # Position the button dynamically
- 
         # Scroll Wheel
         self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
         self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
 
-  
+    
     def load_batch(self, batch_index):
         """
         Load a specific batch of images.
@@ -171,19 +170,8 @@ class Gallery(ctk.CTkScrollableFrame):
         self.current_batch_index += 1
         if self.current_batch_index * self.batch_size < len(self.image_paths):
             self.load_batch(self.current_batch_index)
-            self.update_button_position()  # Reposition the button
-        else:
-            self.load_more_button.configure(text="No More Images", state="disabled")
-
-    def update_button_position(self):
-        """
-        Update the position of the "Load More" button.
-        """
-        button_row = (self.current_batch_index + 1) * (self.batch_size // 4)
-        print(f"Button row: {button_row}")  # Debugging line
-        self.load_more_button.grid(row=button_row, column=0, columnspan=4, pady=10)
-
-
+        else :
+            self.bottom_button.load_more_button.configure(text="No More Images", state="disabled")
 
 
     def image_clicked(self, index):
@@ -225,7 +213,11 @@ class Bottom_Bar(ctk.CTkFrame):
 
         monitor_widget = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors']] ,command=self.select_monitor , variable=self.mw_var) 
         monitor_widget.pack(side='left', padx=30)
+
+        self.load_more_button = ctk.CTkButton(self, text="Load More", command=self.gallery.load_next_batch)
+        self.load_more_button.pack(side='left', padx=50)
         
+
     # Debugging
     def select_monitor(self,monitor):
         print(f"Selected monitor: {monitor}")  
