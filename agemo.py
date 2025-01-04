@@ -81,7 +81,7 @@ class Main_Frame(ctk.CTk):
         self.file_data = SharedData()
         self.file_data.check_monitors()
         
-        if self.file_data.data['dpi']:
+        if self.file_data.data.get('dpi'):
             self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
             self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
          
@@ -90,7 +90,7 @@ class Main_Frame(ctk.CTk):
         # thumnailer.ligma()
         
         #thumbnailer disabled on first time setup
-        if self.file_data.data['wallpapers_dir']:
+        if self.file_data.data.get('wallpapers_dir'):
              thumnailer.ligma(self.file_data.data['wallpapers_dir'])
 
 
