@@ -254,8 +254,6 @@ class Top_bar(ctk.CTkFrame):
         super().__init__(parent)
         
         self.file_data = shared_data
-        self.flag = threading.Event()
-        self.total = None
 
         self.settings = ctk.CTkButton(self, text= "settings",command=self.call_settings).pack(side='left',padx=10)
         self.sources = ctk.CTkButton(self, text= "Srources",command=self.getdir).pack(side='left',padx=10)
@@ -263,7 +261,8 @@ class Top_bar(ctk.CTkFrame):
         self.ex = ctk.CTkButton(self, text= 'X', fg_color='black' ,command=self.kill).pack(anchor='e')
         
         self.settings_window = None
-    
+        
+
     # calls Settings_Window
     def call_settings(self):
         if self.settings_window is None or not self.settings_window.winfo_exists():
@@ -292,23 +291,24 @@ class Top_bar(ctk.CTkFrame):
             if iteration == total:
                 label.configure(text=f"{prefix} |{'█' * length}| 100% {suffix}")
 
+       def update_progress(iteration):
+           if iteration <= 30:
+               progressBar(iteration, 30, popup_loading)
+               self.after(1000, update_progress, iteration + 1)  # Schedule next update after 1 second
+
+
        popup = ctk.CTkToplevel(self)
        popup.focus()
        popup.attributes('-type', 'dialog')
-       popup.geometry('500x400')
+       popup.geometry('1200x400')
        
        popup_label = ctk.CTkLabel(popup,text='Indexing and creating thumbnails')
        popup_label.pack()
 
        popup_loading = ctk.CTkLabel(popup,text='█')
        popup_loading.pack(pady=20, padx= 20 ,anchor='w')
-    
-       #inner f 
-       while not self.flag.is_set():
-            current = len(os.listdir(os.path.join(os.path.dirname(__file__), 'thumbnails/') ))
-            progressBar(current,self.total,popup_loading)
-            print(current)
-            
+       
+       update_progress(0)
 
     #About Popup
     def aboutf(self):
@@ -337,16 +337,10 @@ class Top_bar(ctk.CTkFrame):
             thumnailer.ligma(self.file_data.data['wallpapers_dir'])
 
         # fisrst time run here
-        elif self.file_data.data.get('wallpapers_dir') == '':
+        elif not self.file_data.data.get('wallpapers_dir'):
+            self.first_time_run()
             print('First time run')
-            
-            t1 = threading.Thread(target=self.first_time_run)
-            t1.start()
             thumnailer.ligma(self.file_data.data['wallpapers_dir'])
-            self.flag.set()
-            t1.join()
-
-
 
 # settings window pop up 
 class Settings_Window(ctk.CTkToplevel):
