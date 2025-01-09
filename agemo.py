@@ -12,7 +12,7 @@ import json
 import subprocess
 import time
 import os
-
+import threading
 
 import thumnailer
 
@@ -85,7 +85,6 @@ class Main_Frame(ctk.CTk):
             self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
             self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
          
-        
         
         # thumnailer.ligma()
         
@@ -255,6 +254,8 @@ class Top_bar(ctk.CTkFrame):
         super().__init__(parent)
         
         self.file_data = shared_data
+        self.flag = threading.Event()
+        self.total = None
 
         self.settings = ctk.CTkButton(self, text= "settings",command=self.call_settings).pack(side='left',padx=10)
         self.sources = ctk.CTkButton(self, text= "Srources",command=self.getdir).pack(side='left',padx=10)
@@ -274,7 +275,41 @@ class Top_bar(ctk.CTkFrame):
     def kill(self):
         app.quit()
     
+    def first_time_run(self):
+       #inner f
+       def progressBar(iteration, total, label, prefix='', suffix='', decimals=1, length=100, fill='█'):
+            """
+            @params:
+                iteration   - Required  : current iteration (Int)
+                total       - Required  : total iterations (Int)
+                label       - Required  : CTkLabel widget to update (CTkLabel)
+            """
+            percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+            filledLength = int(length * iteration // total)
+            bar = fill * filledLength + '-' * (length - filledLength)
+            label_text = f'{prefix} |{bar}| {percent}% {suffix}'
+            label.configure(text=label_text)
+            if iteration == total:
+                label.configure(text=f"{prefix} |{'█' * length}| 100% {suffix}")
+
+       popup = ctk.CTkToplevel(self)
+       popup.focus()
+       popup.attributes('-type', 'dialog')
+       popup.geometry('500x400')
+       
+       popup_label = ctk.CTkLabel(popup,text='Indexing and creating thumbnails')
+       popup_label.pack()
+
+       popup_loading = ctk.CTkLabel(popup,text='█')
+       popup_loading.pack(pady=20, padx= 20 ,anchor='w')
     
+       #inner f 
+       while not self.flag.is_set():
+            current = len(os.listdir(os.path.join(os.path.dirname(__file__), 'thumbnails/') ))
+            progressBar(current,self.total,popup_loading)
+            print(current)
+            
+
     #About Popup
     def aboutf(self):
         message = '''
@@ -285,14 +320,31 @@ class Top_bar(ctk.CTkFrame):
      
     def getdir(self):
         
-        wallpapers_dir=  ctk.filedialog.askdirectory()
-        self.file_data.data['wallpapers_dir'] = wallpapers_dir
-        print(wallpapers_dir)
+        self.wallpapers_dir=  ctk.filedialog.askdirectory()
+        self.file_data.data['wallpapers_dir'] = self.wallpapers_dir
+        print(self.wallpapers_dir)
         print (self.file_data.data['wallpapers_dir'])
+
+        self.total = len(self.wallpapers_dir)
+        print('Total images on wallpaper dir:', self.total)
 
         # Write path of wallpapers_dir
         with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
             json.dump(self.file_data.data,f, indent=4)
+
+        # start indexing
+        if self.file_data.data.get('wallpapers_dir'):
+            thumnailer.ligma(self.file_data.data['wallpapers_dir'])
+
+        # fisrst time run here
+        elif self.file_data.data.get('wallpapers_dir') == '':
+            print('First time run')
+            
+            t1 = threading.Thread(target=self.first_time_run)
+            t1.start()
+            thumnailer.ligma(self.file_data.data['wallpapers_dir'])
+            self.flag.set()
+            t1.join()
 
 
 
@@ -394,6 +446,13 @@ class Settings_Window(ctk.CTkToplevel):
         # write to config file
         with open(os.path.join(self.file_data.script_path,'agemo.json'), 'w') as f:
             json.dump(self.file_data.data,f, indent=4)
+
+
+
+class loading_bar():
+    def __init__(self):
+        pass
+        
 
 
 
