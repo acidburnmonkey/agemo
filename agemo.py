@@ -4,22 +4,19 @@
 #  https://github.com/acidburnmonkey
 #
 
-
-import customtkinter as ctk
-from CTkMessagebox import CTkMessagebox
-from PIL import Image
 import json
 import subprocess
 import time
 import os
-import threading
-
+import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
+from PIL import Image
 import thumnailer
 
 
 class SharedData:
     def __init__(self):
-      
+
         self.script_path = os.path.join(os.path.dirname(__file__))
         self.data = self.load_settings()
         self.check_monitors()
@@ -41,11 +38,11 @@ class SharedData:
         try:
             hypr_ctl = subprocess.run(['hyprctl','monitors','-j'], stdout=subprocess.PIPE, text=True)
             hold = json.loads(hypr_ctl.stdout)
-            
-            # returns list of monitor names 
-            monitors = [m.get('name') for m in hold] 
+
+            # returns list of monitor names
+            monitors = [m.get('name') for m in hold]
             self.data['monitors'] = monitors
- 
+
             # Auto populate Monitors
             with open(os.path.join(self.script_path,'agemo.json'),'w') as f:
                 json.dump(self.data,f, indent=4)
@@ -80,14 +77,14 @@ class Main_Frame(ctk.CTk):
         # intantiate Json files
         self.file_data = SharedData()
         self.file_data.check_monitors()
-        
+
         if self.file_data.data.get('dpi'):
             self.wscaling =  ctk.set_widget_scaling(self.file_data.data['dpi'])  # widget dimensions and text size
             self.scaling = ctk.set_window_scaling(self.file_data.data['dpi'])
-         
-        
+
+
         # thumnailer.ligma()
-        
+
         #thumbnailer disabled on first time setup
         if self.file_data.data.get('wallpapers_dir'):
              thumnailer.ligma(self.file_data.data['wallpapers_dir'])
@@ -98,33 +95,33 @@ class Main_Frame(ctk.CTk):
         #top menu bar
         self.top_bar =Top_bar(self, self.file_data)
         self.top_bar.grid(column=0 , row=0, sticky='we')
-        
+
         self.gallery_frame = Gallery(self,self.file_data , None)
         self.gallery_frame.grid(column=0 , row=1, sticky='wens')
-        
+
 
         self.bottom_bar = Bottom_Bar(self, self.gallery_frame,self.file_data)
         self.bottom_bar.grid(column=0 , row=2, sticky='we')
-        
+
         # Link Bottom_Bar back to Gallery (janky circular link but works)
         self.gallery_frame.bottom_button = self.bottom_bar
 
-    
+
 class Gallery(ctk.CTkScrollableFrame):
     def __init__(self, parent, shared_data, load_button):
         super().__init__(parent, width=3200, height=2600)
-        
+
 
         self.json = shared_data
         self.image_paths = list(self.json.thumbnails_data.keys())
-        self.current_batch_index = 0  
-        self.batch_size = 40  
+        self.current_batch_index = 0
+        self.batch_size = 40
         self.labels = []  # Store references to labels for the images
-        self.current_image_index = ctk.IntVar(value=-1) 
+        self.current_image_index = ctk.IntVar(value=-1)
         self.bottom_button = load_button
 
-        self.columnconfigure((0, 1, 2, 3), weight=1, uniform="batch") 
-        self.rowconfigure((0, 1, 2, 3), weight=1, uniform="batch")  
+        self.columnconfigure((0, 1, 2, 3), weight=1, uniform="batch")
+        self.rowconfigure((0, 1, 2, 3), weight=1, uniform="batch")
 
         # Load the first batch
         self.load_batch(self.current_batch_index)
@@ -133,7 +130,7 @@ class Gallery(ctk.CTkScrollableFrame):
         self.bind_all("<Button-4>", lambda e: self._parent_canvas.yview("scroll", -1, "units"))
         self.bind_all("<Button-5>", lambda e: self._parent_canvas.yview("scroll", 1, "units"))
 
-    
+
     def load_batch(self, batch_index):
         """
         Load a specific batch of images.
@@ -174,18 +171,18 @@ class Gallery(ctk.CTkScrollableFrame):
 
 
     def image_clicked(self, index):
-        
+
         # Update the currently clicked image index
         self.current_image_index.set(index)
         clicked_label = self.labels[index]
-        
+
         if hasattr(self, 'overlay_image') and self.overlay_image.winfo_exists():
             self.overlay_image.destroy()
 
         # Create a button and place it over the clicked image
         image = Image.open('assets/salomon.png')
         photo = ctk.CTkImage(light_image=image, dark_image=image, size=(300, 300))
-        
+
         self.overlay_image = ctk.CTkLabel(self, text='', image=photo)
         grid_info = clicked_label.grid_info()
         self.overlay_image.grid(row=grid_info["row"], column=grid_info["column"], padx=grid_info["padx"], pady=grid_info["pady"])
@@ -197,33 +194,33 @@ class Gallery(ctk.CTkScrollableFrame):
 class Bottom_Bar(ctk.CTkFrame):
     def __init__(self, parent, gallery_instance, shared_data):
         super().__init__(parent)
-        
+
         # Json
         self.file_data = shared_data
         self.gallery = gallery_instance
-        
+
 
         # Widgets
         ctk.CTkButton(self, text="Apply", command=self.apply_button).pack(side='left', padx=30)
-        
+
 
         self.mw_var = ctk.StringVar()
         self.mw_var.set('Monitors')
 
-        monitor_widget = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors']] ,command=self.select_monitor , variable=self.mw_var) 
+        monitor_widget = ctk.CTkOptionMenu(self, values=[v for v in self.file_data.data['monitors']] ,command=self.select_monitor , variable=self.mw_var)
         monitor_widget.pack(side='left', padx=30)
 
         self.load_more_button = ctk.CTkButton(self, text="Load More", command=self.gallery.load_next_batch)
         self.load_more_button.pack(side='left', padx=50)
-        
+
 
     # Debugging
     def select_monitor(self,monitor):
-        print(f"Selected monitor: {monitor}")  
+        print(f"Selected monitor: {monitor}")
 
     def apply_button(self):
         from HyprParser import HyprParser
-        
+
         # Check if an image has been clicked
         current_index = self.gallery.current_image_index.get()
 
@@ -231,10 +228,10 @@ class Bottom_Bar(ctk.CTkFrame):
             # Retrieve the image last clicked as key
             clicked_image = self.gallery.labels[current_index].image_path
             real_path = self.file_data.thumbnails_data.get(clicked_image)[0]
-            
+
             # Debug
             print(real_path)
-            
+
             if (self.mw_var.get() !='Monitors'):
 
                 HyprParser.hypr_write(real_path,self.mw_var.get())
@@ -244,24 +241,24 @@ class Bottom_Bar(ctk.CTkFrame):
 
                 #debug
                 #print(real_path, '        ', self.mw_var.get())
-        
-        
+
+
 
 
 #### top bar
 class Top_bar(ctk.CTkFrame):
     def __init__(self,parent,shared_data):
         super().__init__(parent)
-        
+
         self.file_data = shared_data
 
         self.settings = ctk.CTkButton(self, text= "settings",command=self.call_settings).pack(side='left',padx=10)
         self.sources = ctk.CTkButton(self, text= "Srources",command=self.getdir).pack(side='left',padx=10)
         self.about = ctk.CTkButton(self, text= "About",command=self.aboutf).pack(side='left',padx=10)
         self.ex = ctk.CTkButton(self, text= 'X', fg_color='black' ,command=self.kill).pack(anchor='e')
-        
+
         self.settings_window = None
-        
+
 
     # calls Settings_Window
     def call_settings(self):
@@ -273,54 +270,65 @@ class Top_bar(ctk.CTkFrame):
     #quit app
     def kill(self):
         app.quit()
-    
-    def first_time_run(self):
+
+    def first_time_run(self,total):
+       counter = 15
+
        #inner f
        def progressBar(iteration, total, label, prefix='', suffix='', decimals=1, length=100, fill='█'):
-            """
-            @params:
-                iteration   - Required  : current iteration (Int)
-                total       - Required  : total iterations (Int)
-                label       - Required  : CTkLabel widget to update (CTkLabel)
-            """
-            percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-            filledLength = int(length * iteration // total)
-            bar = fill * filledLength + '-' * (length - filledLength)
-            label_text = f'{prefix} |{bar}| {percent}% {suffix}'
-            label.configure(text=label_text)
-            if iteration == total:
-                label.configure(text=f"{prefix} |{'█' * length}| 100% {suffix}")
+           """
+           @params:
+               iteration   - Required  : current iteration (Int)
+               total       - Required  : total iterations (Int)
+               label       - Required  : CTkLabel widget to update (CTkLabel)
+           """
+           percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+           filledLength = int(length * iteration // total)
+           bar = fill * filledLength + '-' * (length - filledLength)
+           label_text = f'{prefix} |{bar}| {percent}% {suffix}'
+           label.configure(text=label_text)
+           if iteration == total:
+               label.configure(text=f"{prefix} |{'█' * length}| 100% {suffix}")
+
+       if total > 300:
+          counter = 30
+       elif total >= 1000:
+          counter = 90
 
        def update_progress(iteration):
-           if iteration <= 30:
-               progressBar(iteration, 30, popup_loading)
+           if iteration <= counter:
+               progressBar(iteration, counter, popup_loading)
                self.after(1000, update_progress, iteration + 1)  # Schedule next update after 1 second
-
 
        popup = ctk.CTkToplevel(self)
        popup.focus()
        popup.attributes('-type', 'dialog')
        popup.geometry('1200x400')
-       
+
        popup_label = ctk.CTkLabel(popup,text='Indexing and creating thumbnails')
        popup_label.pack()
 
        popup_loading = ctk.CTkLabel(popup,text='█')
        popup_loading.pack(pady=20, padx= 20 ,anchor='w')
-       
+
        update_progress(0)
+
+
 
     #About Popup
     def aboutf(self):
         message = '''
-        Agemo 
+        Agemo
         https://github.com/acidburnmonkey/agemo
         '''
         CTkMessagebox(self,title="About",wraplength=9000000 ,icon='assets/agemo.png',message=message)
-     
+
+
     def getdir(self):
-        
-        self.wallpapers_dir=  ctk.filedialog.askdirectory()
+
+        self.wallpapers_dir =  ctk.filedialog.askdirectory()
+        self.prev_wallpapers_dir = self.file_data.data['wallpapers_dir']
+
         self.file_data.data['wallpapers_dir'] = self.wallpapers_dir
         print(self.wallpapers_dir)
         print (self.file_data.data['wallpapers_dir'])
@@ -328,34 +336,40 @@ class Top_bar(ctk.CTkFrame):
         self.total = len(self.wallpapers_dir)
         print('Total images on wallpaper dir:', self.total)
 
+        print("This statement :" , bool(self.prev_wallpapers_dir))
+
         # Write path of wallpapers_dir
-        with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
-            json.dump(self.file_data.data,f, indent=4)
+        if self.wallpapers_dir:
+            with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
+                json.dump(self.file_data.data,f, indent=4)
+
 
         # start indexing
-        if self.file_data.data.get('wallpapers_dir'):
-            thumnailer.ligma(self.file_data.data['wallpapers_dir'])
-
         # fisrst time run here
-        elif not self.file_data.data.get('wallpapers_dir'):
-            self.first_time_run()
-            print('First time run')
+        if ( not bool(self.prev_wallpapers_dir)) and self.wallpapers_dir:
+            self.first_time_run(self.total)
+            print('First time run:', bool(self.prev_wallpapers_dir))
             thumnailer.ligma(self.file_data.data['wallpapers_dir'])
 
-# settings window pop up 
+        elif self.wallpapers_dir:
+            thumnailer.ligma(self.file_data.data['wallpapers_dir'])
+
+
+
+# settings window pop up
 class Settings_Window(ctk.CTkToplevel):
     def __init__(self,parent):
         super().__init__(parent)
-        
+
         self.file_data = SharedData()
 
         self.attributes('-type', 'dialog')
         self.columnconfigure((6,1),weight=1)
-        
+
         #exit button
         self.exit  = ctk.CTkButton(self,text='x',fg_color='black',command=self.destroy)
         self.exit.grid(row=0,column=6,sticky='ne')
-        
+
         self.dpi_label = ctk.CTkLabel(self,text='Default Dpi')
         self.dpi_label.grid(row=1,column=1 ,padx=10, pady=10)
         # DPI Scale
@@ -366,14 +380,14 @@ class Settings_Window(ctk.CTkToplevel):
         self.swtich_var = ctk.IntVar(value=0)
         self.dpi_enabler = ctk.CTkSwitch(self, variable=self.swtich_var,onvalue=1, offvalue=0 ,command=self.dpi_switch,text='Enable DPI')
         self.dpi_enabler.grid(row=2,column=2 ,padx=10, pady=10)
-        
+
 
         #Splash
         self.splash_label = ctk.CTkLabel(self,text='Splash')
         self.splash_label.grid(row=3,column=1 ,padx=5, pady=5)
         self.splash_options = ctk.CTkOptionMenu(self,values=['disabled','enabled'])
         self.splash_options.grid(row=3,column=2 ,padx=5, pady=10)
-        
+
         #IPc
         self.ipc_label = ctk.CTkLabel(self,text='Ipc')
         self.ipc_label.grid(row=3,column=3 ,padx=5, pady=5)
@@ -384,7 +398,7 @@ class Settings_Window(ctk.CTkToplevel):
         # Apply Button
         self.apply_button = ctk.CTkButton(self, text='Apply', command=self.apply)
         self.apply_button.grid(row=8,column=2 ,padx=10, pady=10)
-        
+
         # Reading from json
         if self.file_data.data['dpi']:
             self.swtich_var.set(1)
@@ -396,7 +410,7 @@ class Settings_Window(ctk.CTkToplevel):
         if self.file_data.data['splash']:
             self.splash_options.set('enabled')
 
-    
+
     # Enables or Disables dpi scaling
     def dpi_switch(self):
         if self.swtich_var.get() == 0:
@@ -404,18 +418,18 @@ class Settings_Window(ctk.CTkToplevel):
             self.dpi_label.configure(text='Default Dpi')
         elif self.swtich_var.get() == 1:
             self.dpi_scale.configure(state='normal')
-               
+
         self.columnconfigure(4,weight=1)
 
-        
+
     def set_dpi(self,value):
         self.dpi_label.configure(text=f'Dpi:{value}')
-        
+
 
     def apply(self):
         value = self.dpi_scale.get()
         #print(self.dpi_scale._state)
-        
+
         #Allows to set Dpi
         if self.swtich_var.get() == 1:
             self.wscaling =  ctk.set_widget_scaling(value)  # widget dimensions and text size
@@ -424,30 +438,22 @@ class Settings_Window(ctk.CTkToplevel):
 
         elif self.swtich_var.get() == 0:
             self.file_data.data['dpi'] = None
-        
+
         # IPC
         if self.ipc_options.get() == 'enabled':
-            self.file_data.data['ipc'] = True 
+            self.file_data.data['ipc'] = True
         else:
-            self.file_data.data['ipc'] = False 
+            self.file_data.data['ipc'] = False
 
         #Splash
         if self.splash_options.get() == 'enabled':
-            self.file_data.data['splash'] = True 
+            self.file_data.data['splash'] = True
         else:
-            self.file_data.data['splash'] = False 
-        
+            self.file_data.data['splash'] = False
+
         # write to config file
         with open(os.path.join(self.file_data.script_path,'agemo.json'), 'w') as f:
             json.dump(self.file_data.data,f, indent=4)
-
-
-
-class loading_bar():
-    def __init__(self):
-        pass
-        
-
 
 
 if __name__ == '__main__':
