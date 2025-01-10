@@ -3,7 +3,8 @@ import os
 import json
 from multiprocessing import Pool, Manager, cpu_count
 
-CACHE_FILE = "thumbnail_cache.json"
+
+CACHE_FILE = os.path.join(os.path.dirname(__file__),"thumbnail_cache.json")
 
 def load_cache():
     """Load the cache from a file or return an empty dictionary if the file is empty or invalid."""
