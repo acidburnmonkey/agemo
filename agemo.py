@@ -100,7 +100,6 @@ class Main_Frame(ctk.CTk):
              thumnailer.ligma(self.file_data.data['wallpapers_dir'])
 
 
-
         ## Widgets
         #top menu bar
         self.top_bar =Top_bar(self, self.file_data)
@@ -331,7 +330,8 @@ class Top_bar(ctk.CTkFrame):
         Agemo
         https://github.com/acidburnmonkey/agemo
         '''
-        CTkMessagebox(self,title="About",wraplength=9000000 ,icon='assets/agemo.png',message=message)
+        
+        CTkMessagebox(self,title="About",wraplength=9000000 ,icon=os.path.join(self.file_data.script_path ,'assets/agemo.png'),message=message)
 
 
     def getdir(self):
@@ -358,7 +358,7 @@ class Top_bar(ctk.CTkFrame):
         # fisrst time run here
         if ( not bool(self.prev_wallpapers_dir)) and self.wallpapers_dir:
             self.first_time_run(self.total)
-            print('First time run:', bool(self.prev_wallpapers_dir))
+            print('First time run:', not bool(self.prev_wallpapers_dir))
             thumnailer.ligma(self.file_data.data['wallpapers_dir'])
 
         elif self.wallpapers_dir:
