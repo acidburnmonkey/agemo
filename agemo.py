@@ -24,9 +24,19 @@ class SharedData:
 
 
     def load_settings(self):
+        default_settings = {
+            "monitors": [],
+            "splash": False,
+            "ipc": True,
+            "dpi": None,
+            "wallpapers_dir": None
+        }
+        
         try:
             with open(os.path.join(self.script_path,'agemo.json'), 'r') as f:
-                return json.load(f)
+                file_data = json.load(f)
+                return {**default_settings, **file_data}
+        
         except FileNotFoundError:
             print(f"Error: Configuration file not found.")
             return {}

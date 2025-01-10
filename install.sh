@@ -17,3 +17,4 @@ chmod +x "$HOME/.local/share/agemo/agemo.py"
 
 pip install -r requirements.txt
 
+echo 'Done ,agemo Installed on ~/.local/share/'
