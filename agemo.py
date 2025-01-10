@@ -336,13 +336,13 @@ class Top_bar(ctk.CTkFrame):
         self.total = len(self.wallpapers_dir)
         print('Total images on wallpaper dir:', self.total)
 
-        print("This statement :" , bool(self.prev_wallpapers_dir))
-
+        #print("debug :",'wallpapers_dir:', self.wallpapers_dir,  'Prev:', self.prev_wallpapers_dir
+        #      ,'\t',self.wallpapers_dir == self.prev_wallpapers_dir )
+        
         # Write path of wallpapers_dir
         if self.wallpapers_dir:
             with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
                 json.dump(self.file_data.data,f, indent=4)
-
 
         # start indexing
         # fisrst time run here
