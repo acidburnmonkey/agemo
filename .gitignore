@@ -2,3 +2,4 @@ src
 thumbnails
 test.py
 thumbnail_cache.json
+__pycache__

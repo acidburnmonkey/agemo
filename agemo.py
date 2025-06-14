@@ -31,12 +31,12 @@ class SharedData:
             "dpi": None,
             "wallpapers_dir": None
         }
-        
+
         try:
             with open(os.path.join(self.script_path,'agemo.json'), 'r') as f:
                 file_data = json.load(f)
                 return {**default_settings, **file_data}
-        
+
         except FileNotFoundError:
             print(f"Error: Configuration file not found.")
             return {}
@@ -330,7 +330,7 @@ class Top_bar(ctk.CTkFrame):
         Agemo
         https://github.com/acidburnmonkey/agemo
         '''
-        
+
         CTkMessagebox(self,title="About",wraplength=9000000 ,icon=os.path.join(self.file_data.script_path ,'assets/agemo.png'),message=message)
 
 
@@ -348,7 +348,7 @@ class Top_bar(ctk.CTkFrame):
 
         #print("debug :",'wallpapers_dir:', self.wallpapers_dir,  'Prev:', self.prev_wallpapers_dir
         #      ,'\t',self.wallpapers_dir == self.prev_wallpapers_dir )
-        
+
         # Write path of wallpapers_dir
         if self.wallpapers_dir:
             with open(os.path.join(self.file_data.script_path,'agemo.json'),'w') as f:
