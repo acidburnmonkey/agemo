@@ -8,37 +8,40 @@ class BottomBar(qt.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+
+        # with open('BottomBar.qss','r') as f:
+        #     self.css = f.read()
+
+
         # buttons
         self.apply = qt.QPushButton("Apply")
         self.apply2 = qt.QPushButton("Apply2")
 
-        # Layout
-        self.b_layout = qt.QHBoxLayout(self)
-
+        # Layout and  frame
+        self.bframe = qt.QFrame(self)
+        self.b_layout = qt.QHBoxLayout(self.bframe)
         self.b_layout.addWidget(self.apply)
         self.b_layout.addWidget(self.apply2)
+
+        #mainLayout
+        self.main_layout = qt.QHBoxLayout(self)
+        self.main_layout.addWidget(self.bframe)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
 
         #Styling
         self.initUi()
 
 
     def initUi(self):
-        # "ClassName"
-        self.setObjectName("bottomBar")
-        self.setStyleSheet('background: #181825 ; color: white')
 
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        # (left, top, right, bottom)
         # self.b_layout.setContentsMargins()
-        self.apply.setGeometry(0,0,200,200)
+        self.bframe.setStyleSheet('QFrame{border:1px solid blue; border-radius: 10px;}')
+        # self.bframe.setStyleSheet(self.css)
 
-        # self.apply.
-
-
-
-
+        self.apply.setFixedSize(100,20) #W , H
 
 
 
@@ -50,6 +53,7 @@ class MainWindow(qt.QMainWindow):
         super().__init__()
 
         self.bottom_bar = BottomBar(self)
+        self.testLabel = qt.QLabel('TEST')
 
         self.initUi()
 
@@ -59,8 +63,16 @@ class MainWindow(qt.QMainWindow):
 
         v_box = qt.QVBoxLayout()
 
-        v_box.addStretch() #  verify
+        # (left, top, right, bottom)
+        v_box.setContentsMargins(0,0,0,0)
 
+
+        #test
+        v_box.addWidget(self.testLabel)
+
+        self.testLabel.setStyleSheet('color:black; background-color:#6ea5ff; border: solid black;')
+
+        v_box.addStretch() # Pushes to bottom
         v_box.addWidget(self.bottom_bar)
 
         central_widget.setLayout(v_box)
