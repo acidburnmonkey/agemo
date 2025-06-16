@@ -85,18 +85,25 @@ class BottomBar(qt.QWidget):
 
         # buttons
         self.apply = qt.QPushButton("Apply")
-        self.apply2 = qt.QPushButton("Apply2")
+        self.monitors_select = qt.QComboBox()
+        self.monitors_select.addItems(self.monitors)
+        self.current_monitor = self.monitors[0]
+
+        #events
+        self.monitors_select.currentTextChanged.connect(self.select_monitor)
+
 
         # Layout and  frame
         self.bframe = qt.QFrame(self)
         self.b_layout = qt.QHBoxLayout(self.bframe)
         self.b_layout.addWidget(self.apply)
-        self.b_layout.addWidget(self.apply2)
+        self.b_layout.addWidget(self.monitors_select)
 
         #mainLayout
         self.main_layout = qt.QHBoxLayout(self)
         self.main_layout.addWidget(self.bframe)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
+
 
         #Styling
         self.initUi()
@@ -111,9 +118,13 @@ class BottomBar(qt.QWidget):
         self.bframe.setStyleSheet('QFrame{border:1px solid blue; border-radius: 10px;}')
         # self.bframe.setStyleSheet(self.css)
 
-        self.apply.setFixedSize(100,20) #W , H
+        self.apply.setFixedSize(80,20) #W , H
+        self.monitors_select.setFixedSize(100,20) #W , H
 
 
+    def select_monitor(self,l):
+        self.current_monitor = l
+        print('self.current_monitor:',self.current_monitor)
 
 
 
@@ -124,7 +135,6 @@ class MainWindow(qt.QMainWindow):
 
         #shared data
         self.shared_data = SharedData()
-        print(str(self.shared_data.data))
 
         self.bottom_bar = BottomBar(self.shared_data,self)
         self.testLabel = qt.QLabel('TEST')
