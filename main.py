@@ -1,25 +1,31 @@
+#!/bin/python3
+
+#
+#  https://github.com/acidburnmonkey
+#
+
 import sys
 import os
 import subprocess
 import json
 import PyQt6.QtWidgets as qt
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QIcon, QPixmap
 
 
 class SharedData:
-    '''
+    """
     This class load in memory data that the application uses
     @ self.data => default_settings {dict}
     @ self.thumbnails_data => json
+    @ self.script_path => gets the directory of this program
+    """
 
-    '''
     def __init__(self):
-
         self.script_path = os.path.join(os.path.dirname(__file__))
         self.data = self.load_settings()
         self.check_monitors()
         self.thumbnails_data = self.load_thubnailer_data()
-
 
     def load_settings(self):
         default_settings = {
@@ -27,11 +33,11 @@ class SharedData:
             "splash": False,
             "ipc": True,
             "dpi": None,
-            "wallpapers_dir": None
+            "wallpapers_dir": None,
         }
 
         try:
-            with open(os.path.join(self.script_path,'agemo.json'), 'r') as f:
+            with open(os.path.join(self.script_path, "agemo.json"), "r") as f:
                 file_data = json.load(f)
                 return {**default_settings, **file_data}
 
@@ -44,23 +50,25 @@ class SharedData:
 
     def check_monitors(self):
         try:
-            hypr_ctl = subprocess.run(['hyprctl','monitors','-j'], stdout=subprocess.PIPE, text=True)
+            hypr_ctl = subprocess.run(
+                ["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True
+            )
             hold = json.loads(hypr_ctl.stdout)
 
             # returns list of monitor names
-            monitors = [m.get('name') for m in hold]
-            self.data['monitors'] = monitors
+            monitors = [m.get("name") for m in hold]
+            self.data["monitors"] = monitors
 
             # Auto populate Monitors
-            with open(os.path.join(self.script_path,'agemo.json'),'w') as f:
-                json.dump(self.data,f, indent=4)
+            with open(os.path.join(self.script_path, "agemo.json"), "w") as f:
+                json.dump(self.data, f, indent=4)
 
         except Exception as e:
             print(e)
 
     def load_thubnailer_data(self):
         try:
-            with open(os.path.join(self.script_path,'thumbnail_cache.json'), 'r') as f:
+            with open(os.path.join(self.script_path, "thumbnail_cache.json"), "r") as f:
                 return json.load(f)
         except FileNotFoundError:
             print("Error: Configuration file not found.")
@@ -70,18 +78,15 @@ class SharedData:
             return {}
 
 
-
 # bottom bar
 class BottomBar(qt.QWidget):
-    def __init__(self,shared_data=None,parent=None):
+    def __init__(self, shared_data=None, parent=None):
         super().__init__(parent)
-
 
         # with open('BottomBar.qss','r') as f:
         #     self.css = f.read()
 
-        self.monitors = shared_data.data['monitors']
-        print(self.monitors)
+        self.monitors = shared_data.data["monitors"]
 
         # buttons
         self.apply = qt.QPushButton("Apply")
@@ -89,9 +94,8 @@ class BottomBar(qt.QWidget):
         self.monitors_select.addItems(self.monitors)
         self.current_monitor = self.monitors[0]
 
-        #events
+        # events
         self.monitors_select.currentTextChanged.connect(self.select_monitor)
-
 
         # Layout and  frame
         self.bframe = qt.QFrame(self)
@@ -99,33 +103,100 @@ class BottomBar(qt.QWidget):
         self.b_layout.addWidget(self.apply)
         self.b_layout.addWidget(self.monitors_select)
 
-        #mainLayout
+        # mainLayout
         self.main_layout = qt.QHBoxLayout(self)
         self.main_layout.addWidget(self.bframe)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 
-
-        #Styling
+        # Styling
         self.initUi()
 
-
     def initUi(self):
-
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        # self.b_layout.setContentsMargins()
-        self.bframe.setStyleSheet('QFrame{border:1px solid blue; border-radius: 10px;}')
+        self.bframe.setStyleSheet("QFrame{border:1px solid blue; border-radius: 10px;}")
         # self.bframe.setStyleSheet(self.css)
 
-        self.apply.setFixedSize(80,20) #W , H
-        self.monitors_select.setFixedSize(100,20) #W , H
+        self.apply.setFixedSize(80, 20)  # W , H
+        self.monitors_select.setFixedSize(100, 20)  # W , H
+
+    def select_monitor(self, selected):
+        self.current_monitor = selected
+        print("self.current_monitor:", self.current_monitor)
 
 
-    def select_monitor(self,l):
-        self.current_monitor = l
-        print('self.current_monitor:',self.current_monitor)
+# Top bar
+class TopBar(qt.QWidget):
+    def __init__(self, shared_data=None, parent=None):
+        super().__init__(parent)
 
+        self.shared_data = shared_data
+
+        # Buttons
+        self.close_button = qt.QPushButton()
+        self.close_button.clicked.connect(self.exit)
+        self.settings = qt.QPushButton("Settings")
+        self.sources = qt.QPushButton("Sources")
+        self.about = qt.QPushButton("About")
+        self.about.clicked.connect(self.show_about)
+
+        self.initUI()
+
+    def initUI(self):
+        self.tlayout = qt.QHBoxLayout(self)
+
+        # settings
+        self.tlayout.addWidget(self.settings)
+        self.tlayout.addWidget(self.sources)
+        self.tlayout.addWidget(self.about)
+
+        # exit
+        self.tlayout.addWidget(self.close_button)
+        icon = QIcon(self.shared_data.script_path + "/assets/close.svg")
+        self.close_button.setIcon(icon)
+
+        self.close_button.setIconSize(QSize(20,20)) # change this on qss
+        self.close_button.setFixedSize(20,20)
+
+
+    #About window : dwindow
+    def show_about(self):
+        dwindow = qt.QDialog(self)
+        dwindow.setWindowTitle('About')
+        abox = qt.QVBoxLayout(dwindow)
+
+
+        # image
+        project_icon_label = qt.QLabel(dwindow)
+        pixmap = QPixmap(self.shared_data.script_path + "/assets/agemo.png")
+        project_icon_label.setPixmap(pixmap)
+        project_icon_label.setFixedSize(50,50)
+        project_icon_label.setScaledContents(True) #scale image to label size
+        abox.addWidget(project_icon_label, alignment=Qt.AlignmentFlag.AlignCenter)
+
+
+        #link
+        description = qt.QLabel('https://github.com/acidburnmonkey/agemo',dwindow)
+        version = qt.QLabel('version 2.0',dwindow)
+        version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        abox.addWidget(description)
+        abox.addWidget(version)
+
+        #ok
+        dismiss_button = qt.QPushButton('OK',dwindow)
+        dismiss_button.clicked.connect(dwindow.close)
+        dismiss_button.setFixedSize(50,20)
+        abox.addWidget(dismiss_button, alignment=Qt.AlignmentFlag.AlignCenter)
+
+
+        dwindow.setLayout(abox)
+        dwindow.exec()
+
+
+
+    def exit(self):
+        sys.exit()
 
 
 # Main Window
@@ -133,11 +204,12 @@ class MainWindow(qt.QMainWindow):
     def __init__(self):
         super().__init__()
 
-        #shared data
+        # shared data
         self.shared_data = SharedData()
 
-        self.bottom_bar = BottomBar(self.shared_data,self)
-        self.testLabel = qt.QLabel('TEST')
+        self.bottom_bar = BottomBar(self.shared_data, self)
+        self.top_bar = TopBar(self.shared_data, self)
+        self.testLabel = qt.QLabel("TEST")
 
         self.initUi()
 
@@ -148,15 +220,17 @@ class MainWindow(qt.QMainWindow):
         v_box = qt.QVBoxLayout()
 
         # (left, top, right, bottom)
-        v_box.setContentsMargins(0,0,0,0)
+        v_box.setContentsMargins(0, 0, 0, 0)
 
-
-        #test
+        # test
+        v_box.addWidget(self.top_bar)
         v_box.addWidget(self.testLabel)
 
-        self.testLabel.setStyleSheet('color:black; background-color:#6ea5ff; border: solid black;')
+        self.testLabel.setStyleSheet(
+            "color:black; background-color:#6ea5ff; border: solid black;"
+        )
 
-        v_box.addStretch() # Pushes to bottom
+        v_box.addStretch()  # Pushes to bottom
         v_box.addWidget(self.bottom_bar)
 
         central_widget.setLayout(v_box)
@@ -166,8 +240,8 @@ def main():
     app = qt.QApplication(sys.argv)
     app.setDesktopFileName("Agemo")
     window = MainWindow()
-
     window.setWindowTitle("Agemo")
+
 
     window.show()
     app.exec()
