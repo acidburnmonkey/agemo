@@ -117,6 +117,7 @@ class BottomBar(qt.QWidget):
 
         self.apply.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
+        self.monitors_select.setObjectName("monitors_select")
 
     def select_monitor(self, selected):
         self.current_monitor = selected
@@ -139,65 +140,64 @@ class TopBar(qt.QWidget):
         self.about = qt.QPushButton("About")
         self.about.clicked.connect(self.show_about)
 
-        self.close_button.setObjectName('close_button')
+        self.close_button.setObjectName("close_button")
 
         self.initUI()
 
     def initUI(self):
         self.tlayout = qt.QHBoxLayout(self)
 
-        self.tlayout.setContentsMargins(0,0,0,0)
+        self.tlayout.setContentsMargins(0, 0, 0, 0)
         # settings
         self.tlayout.addWidget(self.settings)
         self.tlayout.addWidget(self.sources)
         self.tlayout.addWidget(self.about)
 
         # exit
-        icon = QIcon( os.path.join(self.shared_data.script_path , 'assets/close.svg') )
+        icon = QIcon(os.path.join(self.shared_data.script_path, "assets/close.svg"))
         self.close_button.setIcon(icon)
         self.close_button.setIconSize(QSize(25, 25))
         self.close_button.setFixedSize(self.close_button.iconSize())
 
+        self.tlayout.addWidget(
+            self.close_button,
+            alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
+        )
 
-        self.tlayout.addWidget(self.close_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
-
-
-    #About window : dwindow
+    # About window : dwindow
     def show_about(self):
         dwindow = qt.QDialog(self)
-        dwindow.setWindowTitle('About')
+        dwindow.setWindowTitle("About")
         abox = qt.QVBoxLayout(dwindow)
-
 
         # image
         project_icon_label = qt.QLabel(dwindow)
         pixmap = QPixmap(self.shared_data.script_path + "/assets/agemo.png")
         project_icon_label.setPixmap(pixmap)
-        project_icon_label.setFixedSize(50,50)
-        project_icon_label.setScaledContents(True) #scale image to label size
-        abox.addWidget(project_icon_label, alignment=Qt.AlignmentFlag.AlignCenter| Qt.AlignmentFlag.AlignTop)
+        project_icon_label.setFixedSize(50, 50)
+        project_icon_label.setScaledContents(True)  # scale image to label size
+        abox.addWidget(
+            project_icon_label,
+            alignment=Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignTop,
+        )
 
-
-        #link
-        description = qt.QLabel('https://github.com/acidburnmonkey/agemo',dwindow)
-        version = qt.QLabel('version 2.0',dwindow)
+        # link
+        description = qt.QLabel("https://github.com/acidburnmonkey/agemo", dwindow)
+        version = qt.QLabel("version 2.0", dwindow)
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         abox.addWidget(description)
         abox.addWidget(version)
 
-        #ok
-        dismiss_button = qt.QPushButton('OK',dwindow)
+        # ok
+        dismiss_button = qt.QPushButton("OK", dwindow)
         dismiss_button.clicked.connect(dwindow.close)
-        dismiss_button.setFixedSize(50,20)
+        dismiss_button.setFixedSize(50, 20)
         abox.addWidget(dismiss_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
-
         dwindow.setLayout(abox)
-        dwindow.adjustSize()#calculate size
-        dwindow.setFixedSize(dwindow.size()) #set fixed
+        dwindow.adjustSize()  # calculate size
+        dwindow.setFixedSize(dwindow.size())  # set fixed
         dwindow.exec()
-
-
 
     def exit(self):
         sys.exit()
@@ -246,8 +246,8 @@ def main():
     window = MainWindow()
     window.setWindowTitle("Agemo")
 
-    script_path = os.path.join(os.path.dirname(__file__),'style.qss')
-    with open(script_path,'r') as f:
+    script_path = os.path.join(os.path.dirname(__file__), "style.qss")
+    with open(script_path, "r") as f:
         qss = f.read()
 
     window.setStyleSheet(qss)

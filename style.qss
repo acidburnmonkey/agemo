@@ -46,3 +46,21 @@ QDialog {
     background-color: #24273A;
 
 }
+
+
+/* QComboBox */
+QComboBox#monitors_select {
+    background-color: #363A4F;
+    color: #F3F6F9;
+}
+
+QComboBox#monitors_select QAbstractItemView {
+    background-color: #363A4F;
+    color: #F3F6F9;
+
+}
+
+/* this is the :hover */
+QComboBox#monitors_select:item:selected {
+    background: #515469;
+}
