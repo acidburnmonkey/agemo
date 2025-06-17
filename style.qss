@@ -33,7 +33,7 @@ MainWindow {
 QPushButton#close_button {
     min-width: 0px;
     min-height: 0px;
-    background-image: url(assets/close.svg);
+    /* background-image: url(assets/close.svg); */
     background-repeat: no-repeat;
     background-position: center;
     width: 25px;

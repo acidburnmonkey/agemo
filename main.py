@@ -153,6 +153,12 @@ class TopBar(qt.QWidget):
         self.tlayout.addWidget(self.about)
 
         # exit
+        icon = QIcon( os.path.join(self.shared_data.script_path , 'assets/close.svg') )
+        self.close_button.setIcon(icon)
+        self.close_button.setIconSize(QSize(25, 25))
+        self.close_button.setFixedSize(self.close_button.iconSize())
+
+
         self.tlayout.addWidget(self.close_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
 
 

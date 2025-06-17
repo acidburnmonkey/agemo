@@ -1,7 +1,42 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="25px" viewBox="0 0 25 25" version="1.1">
-<g id="surface1">
-<path style=" stroke:none;fill-rule:nonzero;fill:rgb(14.117648%,12.156863%,19.215687%);fill-opacity:1;" d="M 12.5 0 C 19.402344 0 25 5.597656 25 12.5 C 25 19.402344 19.402344 25 12.5 25 C 5.597656 25 0 19.402344 0 12.5 C 0 5.597656 5.597656 0 12.5 0 Z M 12.5 0 "/>
-<path style="fill-rule:evenodd;fill:rgb(77.64706%,27.450982%,0%);fill-opacity:1;stroke-width:0.144;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(100%,100%,100%);stroke-opacity:1;stroke-miterlimit:4;" d="M 5.29125 5.29125 C 5.685 4.90125 6.315 4.90125 6.70875 5.29125 L 12 10.58625 L 17.29125 5.29125 C 17.685 4.90125 18.315 4.90125 18.70875 5.29125 C 19.09875 5.685 19.09875 6.315 18.70875 6.70875 L 13.41375 12 L 18.70875 17.29125 C 19.09875 17.685 19.09875 18.315 18.70875 18.70875 C 18.315 19.09875 17.685 19.09875 17.29125 18.70875 L 12 13.41375 L 6.70875 18.70875 C 6.315 19.09875 5.685 19.09875 5.29125 18.70875 C 4.90125 18.315 4.90125 17.685 5.29125 17.29125 L 10.58625 12 L 5.29125 6.70875 C 4.90125 6.315 4.90125 5.685 5.29125 5.29125 Z M 5.29125 5.29125 " transform="matrix(1.041667,0,0,1.041667,0,0)"/>
-</g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="256"
+   height="256"
+   viewBox="0 0 24 24"
+   fill="none"
+   stroke="#ffffff"
+   data-darkreader-inline-stroke=""
+   stroke-width="0.144"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0">
+    <rect
+       x="0"
+       y="0"
+       width="24"
+       height="24"
+       rx="12"
+       fill="#241f31"
+       strokewidth="0"
+       id="rect1"
+       style="fill:#080808;fill-opacity:1" />
+  </g>
+  <g
+     id="SVGRepo_iconCarrier">
+    <path
+       fill-rule="evenodd"
+       clip-rule="evenodd"
+       d="m 5.29289,5.29289 c 0.39053,-0.39052 1.02369,-0.39052 1.41422,0 L 12,10.5858 17.2929,5.29289 c 0.3905,-0.39052 1.0237,-0.39052 1.4142,0 0.3905,0.39053 0.3905,1.02369 0,1.41422 L 13.4142,12 l 5.2929,5.2929 c 0.3905,0.3905 0.3905,1.0237 0,1.4142 -0.3905,0.3905 -1.0237,0.3905 -1.4142,0 L 12,13.4142 6.70711,18.7071 c -0.39053,0.3905 -1.02369,0.3905 -1.41422,0 -0.39052,-0.3905 -0.39052,-1.0237 0,-1.4142 L 10.5858,12 5.29289,6.70711 c -0.39052,-0.39053 -0.39052,-1.02369 0,-1.41422 z"
+       fill="#c64600"
+       data-darkreader-inline-fill=""
+       id="path1" />
+  </g>
 </svg>
