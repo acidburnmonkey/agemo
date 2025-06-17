@@ -1,9 +1,7 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="256px" height="256px" viewBox="0 0 24.00 24.00" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#ffffff" style="--darkreader-inline-stroke: var(--darkreader-text-000000, #e8e6e3);" data-darkreader-inline-stroke="" stroke-width="0.144" transform="rotate(0)matrix(1, 0, 0, 1, 0, 0)">
-<g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(0,0), scale(1)">
-<rect x="0" y="0" width="24.00" height="24.00" rx="12" fill="#241f31" strokewidth="0"/>
-</g>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#000000" stroke-width="0.048" style="--darkreader-inline-stroke: var(--darkreader-text-000000, #e8e6e3);" data-darkreader-inline-stroke=""/>
-<g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M5.29289 5.29289C5.68342 4.90237 6.31658 4.90237 6.70711 5.29289L12 10.5858L17.2929 5.29289C17.6834 4.90237 18.3166 4.90237 18.7071 5.29289C19.0976 5.68342 19.0976 6.31658 18.7071 6.70711L13.4142 12L18.7071 17.2929C19.0976 17.6834 19.0976 18.3166 18.7071 18.7071C18.3166 19.0976 17.6834 19.0976 17.2929 18.7071L12 13.4142L6.70711 18.7071C6.31658 19.0976 5.68342 19.0976 5.29289 18.7071C4.90237 18.3166 4.90237 17.6834 5.29289 17.2929L10.5858 12L5.29289 6.70711C4.90237 6.31658 4.90237 5.68342 5.29289 5.29289Z" fill="#c64600" style="--darkreader-inline-fill: var(--darkreader-background-c64600, #9e3800);" data-darkreader-inline-fill=""/> </g>
-</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="25px" viewBox="0 0 25 25" version="1.1">
+<g id="surface1">
+<path style=" stroke:none;fill-rule:nonzero;fill:rgb(14.117648%,12.156863%,19.215687%);fill-opacity:1;" d="M 12.5 0 C 19.402344 0 25 5.597656 25 12.5 C 25 19.402344 19.402344 25 12.5 25 C 5.597656 25 0 19.402344 0 12.5 C 0 5.597656 5.597656 0 12.5 0 Z M 12.5 0 "/>
+<path style="fill-rule:evenodd;fill:rgb(77.64706%,27.450982%,0%);fill-opacity:1;stroke-width:0.144;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(100%,100%,100%);stroke-opacity:1;stroke-miterlimit:4;" d="M 5.29125 5.29125 C 5.685 4.90125 6.315 4.90125 6.70875 5.29125 L 12 10.58625 L 17.29125 5.29125 C 17.685 4.90125 18.315 4.90125 18.70875 5.29125 C 19.09875 5.685 19.09875 6.315 18.70875 6.70875 L 13.41375 12 L 18.70875 17.29125 C 19.09875 17.685 19.09875 18.315 18.70875 18.70875 C 18.315 19.09875 17.685 19.09875 17.29125 18.70875 L 12 13.41375 L 6.70875 18.70875 C 6.315 19.09875 5.685 19.09875 5.29125 18.70875 C 4.90125 18.315 4.90125 17.685 5.29125 17.29125 L 10.58625 12 L 5.29125 6.70875 C 4.90125 6.315 4.90125 5.685 5.29125 5.29125 Z M 5.29125 5.29125 " transform="matrix(1.041667,0,0,1.041667,0,0)"/>
+</g>
+</svg>

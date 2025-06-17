@@ -1,0 +1,48 @@
+/* Apply to all */
+
+QPushButton {
+    background-color: #65ABFF;
+    border: none;
+    min-height: 20px;
+    min-width: 80px;
+    border-radius: 10px;
+}
+
+QPushButton:hover {
+    background-color: #a1ccff;
+}
+
+QPushButton:pressed {
+    background-color: #4d83c4;
+
+}
+
+QLabel {
+    color: #cad3f5;
+}
+
+
+MainWindow {
+    background-color: #24273A;
+
+}
+
+
+/* end */
+
+QPushButton#close_button {
+    min-width: 0px;
+    min-height: 0px;
+    background-image: url(assets/close.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 25px;
+    height: 25px;
+    background-color: transparent;
+
+}
+
+QDialog {
+    background-color: #24273A;
+
+}

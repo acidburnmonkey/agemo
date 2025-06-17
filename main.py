@@ -11,6 +11,7 @@ import json
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QSizePolicy
 
 
 class SharedData:
@@ -83,9 +84,6 @@ class BottomBar(qt.QWidget):
     def __init__(self, shared_data=None, parent=None):
         super().__init__(parent)
 
-        # with open('BottomBar.qss','r') as f:
-        #     self.css = f.read()
-
         self.monitors = shared_data.data["monitors"]
 
         # buttons
@@ -116,7 +114,6 @@ class BottomBar(qt.QWidget):
         self.b_layout.setSpacing(4)
 
         self.bframe.setStyleSheet("QFrame{border:1px solid blue; border-radius: 10px;}")
-        # self.bframe.setStyleSheet(self.css)
 
         self.apply.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
@@ -136,28 +133,27 @@ class TopBar(qt.QWidget):
         # Buttons
         self.close_button = qt.QPushButton()
         self.close_button.clicked.connect(self.exit)
+
         self.settings = qt.QPushButton("Settings")
         self.sources = qt.QPushButton("Sources")
         self.about = qt.QPushButton("About")
         self.about.clicked.connect(self.show_about)
+
+        self.close_button.setObjectName('close_button')
 
         self.initUI()
 
     def initUI(self):
         self.tlayout = qt.QHBoxLayout(self)
 
+        self.tlayout.setContentsMargins(0,0,0,0)
         # settings
         self.tlayout.addWidget(self.settings)
         self.tlayout.addWidget(self.sources)
         self.tlayout.addWidget(self.about)
 
         # exit
-        self.tlayout.addWidget(self.close_button)
-        icon = QIcon(self.shared_data.script_path + "/assets/close.svg")
-        self.close_button.setIcon(icon)
-
-        self.close_button.setIconSize(QSize(20,20)) # change this on qss
-        self.close_button.setFixedSize(20,20)
+        self.tlayout.addWidget(self.close_button, alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
 
 
     #About window : dwindow
@@ -173,7 +169,7 @@ class TopBar(qt.QWidget):
         project_icon_label.setPixmap(pixmap)
         project_icon_label.setFixedSize(50,50)
         project_icon_label.setScaledContents(True) #scale image to label size
-        abox.addWidget(project_icon_label, alignment=Qt.AlignmentFlag.AlignCenter)
+        abox.addWidget(project_icon_label, alignment=Qt.AlignmentFlag.AlignCenter| Qt.AlignmentFlag.AlignTop)
 
 
         #link
@@ -191,6 +187,8 @@ class TopBar(qt.QWidget):
 
 
         dwindow.setLayout(abox)
+        dwindow.adjustSize()#calculate size
+        dwindow.setFixedSize(dwindow.size()) #set fixed
         dwindow.exec()
 
 
@@ -242,6 +240,11 @@ def main():
     window = MainWindow()
     window.setWindowTitle("Agemo")
 
+    script_path = os.path.join(os.path.dirname(__file__),'style.qss')
+    with open(script_path,'r') as f:
+        qss = f.read()
+
+    window.setStyleSheet(qss)
 
     window.show()
     app.exec()
