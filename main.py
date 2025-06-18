@@ -13,9 +13,7 @@ import json
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtWidgets import QFileDialog, QSizePolicy
-import thumnailer
-
+import xdgthumbails
 
 class SharedData:
     """
@@ -171,12 +169,14 @@ class TopBar(qt.QWidget):
 
     # wallpapers dir
     def get_wallpapers(self):
+
         wallpapers_dir = qt.QFileDialog.getExistingDirectory(
             self,
             "Select the wallpapers directory ",
             "",
             qt.QFileDialog.Option.ShowDirsOnly,
         )
+
         self.prev_wallpapers_dir = self.shared_data.data["wallpapers_dir"]
 
         if wallpapers_dir:
@@ -197,15 +197,13 @@ class TopBar(qt.QWidget):
                 thumnailer.ligma(self.shared_data.data["wallpapers_dir"])
 
             elif wallpapers_dir:
-                thumnailer.ligma(self.shared_data.data["wallpapers_dir"])
+                xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
             ## Debug
             print("Total images on wallpaper dir:", total)
             print("wallpapers_dir:", wallpapers_dir)
-            print(
-                "shared_data['wallpapers_dir'] :",
-                self.shared_data.data["wallpapers_dir"],
-            )
+            print( "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"],)
+
 
     # About window : dwindow
     def show_about(self):
@@ -261,6 +259,7 @@ class MainWindow(qt.QMainWindow):
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
         self.testLabel = qt.QLabel("TEST")
+        self.testLabel2 = qt.QLabel("TEST2")
 
         self.initUi()
 
@@ -276,13 +275,21 @@ class MainWindow(qt.QMainWindow):
         # test
         v_box.addWidget(self.top_bar)
         v_box.addWidget(self.testLabel)
+        v_box.addWidget(self.testLabel2)
 
         self.testLabel.setStyleSheet(
             "color:black; background-color:#6ea5ff; border: solid black;"
         )
         self.testLabel.setFixedSize(155,100)
 
+        self.testLabel2.setPixmap(QPixmap('./src/120.jpg'))
+        self.testLabel2.setFixedSize(155,100)
+        self.testLabel2.setScaledContents(True)
+
+
+
         v_box.addStretch()  # Pushes to bottom
+        #bottom-bar
         v_box.addWidget(self.bottom_bar)
 
         central_widget.setLayout(v_box)
