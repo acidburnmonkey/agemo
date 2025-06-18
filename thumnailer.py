@@ -49,7 +49,7 @@ def generate_thumbnail(image_info):
                 if os.path.getmtime(image_path) <= os.path.getmtime(thumbnail_path):
                     return f"Thumbnail exists in cache: {thumbnail_path}"
             except FileNotFoundError:
-                pass  
+                pass
 
         # Generate thumbnail
         with Image.open(image_path) as img:
@@ -77,7 +77,7 @@ def generate_thumbnail(image_info):
     except Exception as e:
         return f"Error processing {image_path}: {e}"
 
-def process_images(image_paths, output_dir, size=(720, 720)):
+def process_images(image_paths, output_dir, size=(300, 300)):
     """
     Processes a list of images to generate thumbnails using multiprocessing.
     Args:

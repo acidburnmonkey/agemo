@@ -1,5 +1,7 @@
 #!/bin/python3
 
+
+# pyright: reportOptionalMemberAccess=none
 #
 #  https://github.com/acidburnmonkey
 #
@@ -11,7 +13,8 @@ import json
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QIcon, QPixmap
-from PyQt6.QtWidgets import QSizePolicy
+from PyQt6.QtWidgets import QFileDialog, QSizePolicy
+import thumnailer
 
 
 class SharedData:
@@ -137,6 +140,8 @@ class TopBar(qt.QWidget):
 
         self.settings = qt.QPushButton("Settings")
         self.sources = qt.QPushButton("Sources")
+        self.sources.clicked.connect(self.get_wallpapers)
+
         self.about = qt.QPushButton("About")
         self.about.clicked.connect(self.show_about)
 
@@ -163,6 +168,44 @@ class TopBar(qt.QWidget):
             self.close_button,
             alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
         )
+
+    # wallpapers dir
+    def get_wallpapers(self):
+        wallpapers_dir = qt.QFileDialog.getExistingDirectory(
+            self,
+            "Select the wallpapers directory ",
+            "",
+            qt.QFileDialog.Option.ShowDirsOnly,
+        )
+        self.prev_wallpapers_dir = self.shared_data.data["wallpapers_dir"]
+
+        if wallpapers_dir:
+            self.shared_data.data["wallpapers_dir"] = wallpapers_dir
+
+            total = len(os.listdir(wallpapers_dir))
+
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
+                json.dump(self.shared_data.data, f, indent=4)
+
+            # start indexing
+            # fisrst time run here
+            if (not bool(self.prev_wallpapers_dir)) and wallpapers_dir:
+                # self.first_time_run(total) # Implement the loading bar other way
+                print("First time run:", not bool(self.prev_wallpapers_dir))
+                thumnailer.ligma(self.shared_data.data["wallpapers_dir"])
+
+            elif wallpapers_dir:
+                thumnailer.ligma(self.shared_data.data["wallpapers_dir"])
+
+            ## Debug
+            print("Total images on wallpaper dir:", total)
+            print("wallpapers_dir:", wallpapers_dir)
+            print(
+                "shared_data['wallpapers_dir'] :",
+                self.shared_data.data["wallpapers_dir"],
+            )
 
     # About window : dwindow
     def show_about(self):
@@ -211,6 +254,10 @@ class MainWindow(qt.QMainWindow):
         # shared data
         self.shared_data = SharedData()
 
+        print(
+            "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
+        )
+
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
         self.testLabel = qt.QLabel("TEST")
@@ -233,6 +280,7 @@ class MainWindow(qt.QMainWindow):
         self.testLabel.setStyleSheet(
             "color:black; background-color:#6ea5ff; border: solid black;"
         )
+        self.testLabel.setFixedSize(155,100)
 
         v_box.addStretch()  # Pushes to bottom
         v_box.addWidget(self.bottom_bar)
