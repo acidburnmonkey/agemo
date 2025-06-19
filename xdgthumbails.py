@@ -53,10 +53,10 @@ def ligma(wallpapersDir: str):
             {"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn}
         )
 
-    # write out cache.json next to script
+    # write out cache.json
     with open("xdgcache.json", "w", encoding="utf-8") as f:
         json.dump(entries, f, indent=2, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-    ligma("./src/smallb/")
+    ligma("")

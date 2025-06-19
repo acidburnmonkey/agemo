@@ -11,9 +11,10 @@ import os
 import subprocess
 import json
 import PyQt6.QtWidgets as qt
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment
 from PyQt6.QtGui import QIcon, QPixmap
 import xdgthumbails
+
 
 class SharedData:
     """
@@ -137,6 +138,8 @@ class TopBar(qt.QWidget):
         self.close_button.clicked.connect(self.exit)
 
         self.settings = qt.QPushButton("Settings")
+        self.settings.clicked.connect(self.open_settings)
+
         self.sources = qt.QPushButton("Sources")
         self.sources.clicked.connect(self.get_wallpapers)
 
@@ -144,13 +147,16 @@ class TopBar(qt.QWidget):
         self.about.clicked.connect(self.show_about)
 
         self.close_button.setObjectName("close_button")
+        self.settings.setObjectName("settings")
+        self.sources.setObjectName("sources")
+        self.about.setObjectName("about")
 
         self.initUI()
 
     def initUI(self):
         self.tlayout = qt.QHBoxLayout(self)
 
-        self.tlayout.setContentsMargins(0, 0, 0, 0)
+        self.tlayout.setContentsMargins(10, 0, 0, 0)
         # settings
         self.tlayout.addWidget(self.settings)
         self.tlayout.addWidget(self.sources)
@@ -167,9 +173,13 @@ class TopBar(qt.QWidget):
             alignment=Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop,
         )
 
+    ## open SettingsWindow
+    def open_settings(self):
+        self.settings_window = SettingsWindow(self.shared_data)
+        self.settings_window.show()
+
     # wallpapers dir
     def get_wallpapers(self):
-
         wallpapers_dir = qt.QFileDialog.getExistingDirectory(
             self,
             "Select the wallpapers directory ",
@@ -194,7 +204,7 @@ class TopBar(qt.QWidget):
             if (not bool(self.prev_wallpapers_dir)) and wallpapers_dir:
                 # self.first_time_run(total) # Implement the loading bar other way
                 print("First time run:", not bool(self.prev_wallpapers_dir))
-                thumnailer.ligma(self.shared_data.data["wallpapers_dir"])
+                xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
             elif wallpapers_dir:
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
@@ -202,8 +212,10 @@ class TopBar(qt.QWidget):
             ## Debug
             print("Total images on wallpaper dir:", total)
             print("wallpapers_dir:", wallpapers_dir)
-            print( "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"],)
-
+            print(
+                "shared_data['wallpapers_dir'] :",
+                self.shared_data.data["wallpapers_dir"],
+            )
 
     # About window : dwindow
     def show_about(self):
@@ -244,6 +256,99 @@ class TopBar(qt.QWidget):
         sys.exit()
 
 
+class SettingsWindow(qt.QWidget):
+    """Settings Window"""
+
+    def __init__(self, shared_data,parent=None):
+        super().__init__(parent)
+        self.shared_data = shared_data
+
+        # Widgets
+        self.close_button = qt.QPushButton()
+        self.close_button.clicked.connect(self.close)
+
+        #labels
+        self.label = qt.QLabel('Scale Factor',self)
+        self.label.setObjectName('displaySettings')
+
+        #apply
+        self.buttonScale = qt.QPushButton('Apply')
+        self.buttonScale.setObjectName('settingsApply')
+        self.buttonScale.clicked.connect(self.scaleNow)
+
+
+        self.initUI()
+
+
+        try:
+            self.scaleFactor = os.environ["QT_SCALE_FACTOR"]
+        except Exception as e:
+            print(self.scaleFactor, e)
+
+        if self.scaleFactor:
+            self.label.setText(f"""You already have scaling set on environment :
+                                        $QT_SCALE_FACTOR: {self.scaleFactor}
+                               """)
+
+
+
+
+    def initUI(self):
+
+        script_path = os.path.join(os.path.dirname(__file__), "style.qss")
+        with open(script_path, "r") as f:
+            qss = f.read()
+
+        self.setStyleSheet(qss)
+        self.setFixedSize(400, 300)  # w,h
+
+        self.settingsLayout = qt.QGridLayout()
+        self.settingsLayout.setContentsMargins(2, 0, 0, 0)
+        self.settingsLayout.setSpacing(0)
+
+        # settings
+
+        # exit
+        icon = QIcon(os.path.join(self.shared_data.script_path, "assets/close.svg"))
+        self.close_button.setIcon(icon)
+        self.close_button.setIconSize(QSize(25, 25))
+        self.close_button.setFixedSize(self.close_button.iconSize())
+
+        # Corrected: Add widgets to layout (not layout itself)
+        self.settingsLayout.addWidget(self.close_button,0, 1, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+        self.settingsLayout.addWidget(self.label, 0, 0)
+        self.settingsLayout.addWidget(self.buttonScale, 2, 0)
+
+        ##END UI
+        self.setLayout(self.settingsLayout)
+
+
+
+    # Apply Settings
+    def scaleNow(self):
+        new_factor = "1.5"
+
+        # build a QProcessEnvironment
+        env = QProcessEnvironment.systemEnvironment()
+        env.insert("QT_SCALE_FACTOR", new_factor)
+
+        # make a QProcess instance
+        proc = QProcess(self)
+        proc.setProcessEnvironment(env)
+        proc.setProgram(sys.executable)
+        proc.setArguments(sys.argv)
+        proc.setWorkingDirectory(os.getcwd())
+
+        # restart UI
+        ok = proc.startDetached()
+        if not ok:
+            print("⚠️ child spawn failed")
+            return
+
+        #kill current UI
+        qt.QApplication.quit()
+
+
 # Main Window
 class MainWindow(qt.QMainWindow):
     def __init__(self):
@@ -280,16 +385,14 @@ class MainWindow(qt.QMainWindow):
         self.testLabel.setStyleSheet(
             "color:black; background-color:#6ea5ff; border: solid black;"
         )
-        self.testLabel.setFixedSize(155,100)
+        self.testLabel.setFixedSize(155, 100)
 
-        self.testLabel2.setPixmap(QPixmap('./src/120.jpg'))
-        self.testLabel2.setFixedSize(155,100)
+        self.testLabel2.setPixmap(QPixmap("./src/120.jpg"))
+        self.testLabel2.setFixedSize(155, 100)
         self.testLabel2.setScaledContents(True)
 
-
-
         v_box.addStretch()  # Pushes to bottom
-        #bottom-bar
+        # bottom-bar
         v_box.addWidget(self.bottom_bar)
 
         central_widget.setLayout(v_box)
