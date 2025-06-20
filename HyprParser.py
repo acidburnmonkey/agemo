@@ -1,6 +1,5 @@
 import re
 import os
-from CTkMessagebox import CTkMessagebox
 
 
 
@@ -8,10 +7,10 @@ class HyprParser:
 
     @classmethod
     def hypr_reader(cls):
-    
+
         home = os.getlogin()
         config_file = os.path.join(home,'/.config/hypr/hyprpaper.conf')
-        
+
         with open(config_file, 'r') as file:
             config = file.read()
 
@@ -51,7 +50,7 @@ class HyprParser:
             wallpaper_pattern = re.compile(r'^wallpaper\s*=\s*([^,]+),(.*)$')
 
             # Extract preload and wallpaper data
-            preloads = set()  
+            preloads = set()
             wallpapers = {}
             other_lines = []
 
@@ -75,7 +74,7 @@ class HyprParser:
             # Write the updated configuration back to the file
             with open(config_file, 'w') as file:
                 # Write updated preload entries
-                for preload_path in sorted(preloads):  
+                for preload_path in sorted(preloads):
                     file.write(f"preload= {preload_path}\n")
 
                 # Write updated wallpaper entries
@@ -89,7 +88,7 @@ class HyprParser:
             return True
 
         except  FileNotFoundError:
-            CTkMessagebox(title="Error", icon="warning", message="hyprpaper.conf file not found")
+            print("⛔ hyprpaper.conf file not found")
             return False
         except Exception as e:
             print(e)

@@ -55,7 +55,7 @@ def ligma(wallpapersDir: str):
 
     # write out cache.json
     with open("xdgcache.json", "w", encoding="utf-8") as f:
-        json.dump(entries, f, indent=2, ensure_ascii=False)
+        json.dump(entries, f, indent=4, ensure_ascii=False)
 
 
 if __name__ == "__main__":

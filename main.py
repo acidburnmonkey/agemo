@@ -6,7 +6,6 @@
 #  https://github.com/acidburnmonkey
 #
 
-import re
 import sys
 import os
 import subprocess
@@ -264,7 +263,6 @@ class SettingsWindow(qt.QWidget):
         super().__init__(parent)
 
         self.shared_data = shared_data
-        self.uiScaling = None
 
         # Widgets
         self.close_button = qt.QPushButton()
@@ -357,46 +355,54 @@ class SettingsWindow(qt.QWidget):
 
     # Apply Settings
     def scaleNow(self):
+
         new_factor = "1.5"
 
+        if self.shared_data.data['dpi']:
 
-        # build a QProcessEnvironment
-        env = QProcessEnvironment.systemEnvironment()
-        env.insert("QT_SCALE_FACTOR", new_factor)
+            # write to config file
+            with open(os.path.join(self.shared_data.script_path,'agemo.json'), 'w') as f:
+                json.dump(self.shared_data.data,f, indent=4)
 
-        # make a QProcess instance
-        proc = QProcess(self)
-        proc.setProcessEnvironment(env)
-        proc.setProgram(sys.executable)
-        proc.setArguments(sys.argv)
-        proc.setWorkingDirectory(os.getcwd())
+            # build a QProcessEnvironment
+            env = QProcessEnvironment.systemEnvironment()
+            env.insert("QT_SCALE_FACTOR", self.shared_data.data['dpi'])
 
-        # restart UI
-        ok = proc.startDetached()
-        if not ok:
-            print("⚠️ child spawn failed")
-            return
+            # make a QProcess instance
+            proc = QProcess(self)
+            proc.setProcessEnvironment(env)
+            proc.setProgram(sys.executable)
+            proc.setArguments(sys.argv)
+            proc.setWorkingDirectory(os.getcwd())
 
-        #kill current UI
-        qt.QApplication.quit()
+            # restart UI
+            ok = proc.startDetached()
+            if not ok:
+                print("⚠️ child spawn failed")
+                return
+
+            #kill current UI
+            qt.QApplication.quit()
+
 
 
     def slide(self, i):
         val = 1.0 + i * 0.5
         self.label.setText(f'Dpi :{val*100}%')
-        self.uiScaling = str(val)  #it takes a string
+        self.shared_data.data['dpi'] = str(val)  #it takes a string
+        print('self.uiScaling:' ,self.shared_data.data['dpi'])
+        print(self.shared_data.data)
 
     def checkorNot(self,state):
 
         if state == 0:
             self.slider.setDisabled(True)
             self.dpiLabel.setText('Scale UI')
-            self.uiScaling = None
+            self.shared_data.data['dpi'] = None
         else:
             self.dpiLabel.setText('Disable UI Scaling')
             self.slider.setEnabled(True)
         print('dpi switch:',state)
-
 
 
 
