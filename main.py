@@ -6,6 +6,7 @@
 #  https://github.com/acidburnmonkey
 #
 
+import re
 import sys
 import os
 import subprocess
@@ -261,15 +262,34 @@ class SettingsWindow(qt.QWidget):
 
     def __init__(self, shared_data,parent=None):
         super().__init__(parent)
+
         self.shared_data = shared_data
+        self.uiScaling = None
 
         # Widgets
         self.close_button = qt.QPushButton()
         self.close_button.clicked.connect(self.close)
+        self.close_button.setObjectName('close_button')
+
+        #switch
+        self.checkBox = qt.QCheckBox()
+        self.checkBox.stateChanged.connect(self.checkorNot)
+        self.checkBox.setObjectName('checkBox')
+
+        #Sllider
+        self.slider = qt.QSlider(Qt.Orientation.Horizontal)
+        self.slider.valueChanged.connect(self.slide)
+        self.slider.setRange(0,4)
+        self.slider.setSingleStep(1)
+        self.slider.setTickInterval(1)
+        self.slider.setTickPosition(qt.QSlider.TickPosition.TicksAbove)
+        self.slider.setObjectName('slider')
 
         #labels
-        self.label = qt.QLabel('Scale Factor',self)
+        self.label = qt.QLabel('Scale Factor')
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setObjectName('displaySettings')
+        self.dpiLabel = qt.QLabel()
 
         #apply
         self.buttonScale = qt.QPushButton('Apply')
@@ -287,12 +307,12 @@ class SettingsWindow(qt.QWidget):
 
         if self.scaleFactor:
             self.label.setText(f"""You already have scaling set on environment :
-                                        $QT_SCALE_FACTOR: {self.scaleFactor}
+                                  $QT_SCALE_FACTOR: {self.scaleFactor}
                                """)
 
 
 
-
+    # UI
     def initUI(self):
 
         script_path = os.path.join(os.path.dirname(__file__), "style.qss")
@@ -317,7 +337,18 @@ class SettingsWindow(qt.QWidget):
         # Corrected: Add widgets to layout (not layout itself)
         self.settingsLayout.addWidget(self.close_button,0, 1, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         self.settingsLayout.addWidget(self.label, 0, 0)
-        self.settingsLayout.addWidget(self.buttonScale, 2, 0)
+        self.settingsLayout.addWidget(self.buttonScale, 3, 0)
+        self.settingsLayout.addWidget(self.checkBox,1,0)
+        self.settingsLayout.addWidget(self.dpiLabel,1,1)
+        self.settingsLayout.addWidget(self.slider,2,0)
+
+
+        #checkbox
+        if self.shared_data.data['dpi']:
+            self.dpiLabel.setText('Disable Dpi Scaling')
+        elif not self.shared_data.data['dpi'] :
+            self.dpiLabel.setText('Set DPI')
+
 
         ##END UI
         self.setLayout(self.settingsLayout)
@@ -327,6 +358,7 @@ class SettingsWindow(qt.QWidget):
     # Apply Settings
     def scaleNow(self):
         new_factor = "1.5"
+
 
         # build a QProcessEnvironment
         env = QProcessEnvironment.systemEnvironment()
@@ -347,6 +379,25 @@ class SettingsWindow(qt.QWidget):
 
         #kill current UI
         qt.QApplication.quit()
+
+
+    def slide(self, i):
+        val = 1.0 + i * 0.5
+        self.label.setText(f'Dpi :{val*100}%')
+        self.uiScaling = str(val)  #it takes a string
+
+    def checkorNot(self,state):
+
+        if state == 0:
+            self.slider.setDisabled(True)
+            self.dpiLabel.setText('Scale UI')
+            self.uiScaling = None
+        else:
+            self.dpiLabel.setText('Disable UI Scaling')
+            self.slider.setEnabled(True)
+        print('dpi switch:',state)
+
+
 
 
 # Main Window

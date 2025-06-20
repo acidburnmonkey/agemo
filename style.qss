@@ -38,6 +38,8 @@ QPushButton#close_button {
     width: 25px;
     height: 25px;
     background-color: transparent;
+    margin-right: 2px;
+    margin-top: 2px;
 
 }
 
@@ -62,12 +64,12 @@ QPushButton#sources {
 /* QComboBox */
 QComboBox#monitors_select {
     background-color: #363A4F;
-    color: #F3F6F9;
+    color: #f5e0dc;
 }
 
 QComboBox#monitors_select QAbstractItemView {
     background-color: #363A4F;
-    color: #F3F6F9;
+    color: #f5e0dc;
 
 }
 
@@ -100,4 +102,98 @@ QLabel#displaySettings {
     font-size: 8px;
     border: 1px solid #7dc4e4;
     border-radius: 2px;
+}
+
+
+/* checkbox */
+
+QCheckBox {
+    min-width: 40px;
+    max-width: 40px;
+    height: 20px;
+
+    background: #585b70;
+    border-radius: 10px;
+    padding: 0;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    background: #f5e0dc;
+    margin: 1px;
+}
+
+QCheckBox:checked {
+    background: #65ABFF;
+}
+
+QCheckBox::indicator:checked {
+    margin-left: 21px;
+}
+
+QCheckBox:hover {
+    background: #ddd;
+}
+
+QCheckBox:checked:hover {
+    background: #a1ccff;
+}
+
+QCheckBox:unchecked:hover {
+    background: #6c7086;
+}
+
+
+/* slider */
+QSlider {
+    padding: 0 9px;
+}
+
+QSlider::groove:horizontal {
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    margin: 0;
+}
+
+QSlider::sub-page:horizontal {
+    background: #65ABFF;
+    border-radius: 3px;
+}
+
+QSlider::add-page:horizontal {
+    background: #ddd;
+    border-radius: 3px;
+}
+
+/* ——— Handle (knob) ——— */
+QSlider::handle:horizontal {
+    background: #ffffff;
+    border: 2px solid #65ABFF;
+    width: 16px;
+    height: 16px;
+    margin: -5px 0;
+    border-radius: 8px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #f0faff;
+    border-color: #88cfff;
+}
+
+QSlider::handle:horizontal:pressed {
+    background: #e0f0ff;
+    border-color: #65ABFF;
+}
+
+/* :disabled() */
+QSlider:disabled {
+    background: transparent;
+}
+
+QSlider::handle:horizontal:disabled {
+    background: #eee;
+    border: 2px solid #aaa;
 }
