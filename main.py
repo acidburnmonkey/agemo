@@ -297,7 +297,6 @@ class SettingsWindow(qt.QWidget):
 
         self.initUI()
 
-
         try:
             self.scaleFactor = os.environ["QT_SCALE_FACTOR"]
         except Exception as e:
@@ -356,8 +355,6 @@ class SettingsWindow(qt.QWidget):
     # Apply Settings
     def scaleNow(self):
 
-        new_factor = "1.5"
-
         if self.shared_data.data['dpi']:
 
             # write to config file
@@ -402,8 +399,8 @@ class SettingsWindow(qt.QWidget):
         else:
             self.dpiLabel.setText('Disable UI Scaling')
             self.slider.setEnabled(True)
-        print('dpi switch:',state)
 
+# END OF SettingsWindow
 
 
 # Main Window
@@ -456,16 +453,28 @@ class MainWindow(qt.QMainWindow):
 
 
 def main():
+
+    # check for preset DPI
+    with open(os.path.join(os.path.dirname(__file__), "agemo.json"), "r") as f:
+        data = json.load(f)
+        # print('data[dpi]:',data['dpi'])
+
+    if data['dpi']:
+        os.environ["QT_SCALE_FACTOR"] = str(data['dpi'])
+
     app = qt.QApplication(sys.argv)
     app.setDesktopFileName("Agemo")
     window = MainWindow()
     window.setWindowTitle("Agemo")
+
+
 
     script_path = os.path.join(os.path.dirname(__file__), "style.qss")
     with open(script_path, "r") as f:
         qss = f.read()
 
     window.setStyleSheet(qss)
+
 
     window.show()
     app.exec()
