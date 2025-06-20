@@ -4,3 +4,4 @@ test.py
 thumbnail_cache.json
 __pycache__
 .python-version
+xdgcache.json

@@ -16,6 +16,53 @@ import xdgthumbails
 from SharedData import SharedData
 
 
+## Gallery
+class Gallery(qt.QWidget):
+    def __init__(self, shared_data):
+        super().__init__()
+        self.shared_data = shared_data
+
+        # Layouts
+        self.grid_layout = qt.QGridLayout(self)
+        self.grid_layout.setContentsMargins(0,0,0,0)
+
+        # Scroll Area
+        self.scroll_area = qt.QScrollArea()
+        self.scroll_widget = qt.QWidget()
+        self.scroll_widget.setLayout(self.grid_layout)
+        self.scroll_area.setWidget(self.scroll_widget)
+        self.scroll_area.setWidgetResizable(True)
+
+        # Add widgets to main layout
+
+        ### TEST
+        self.testLabel = qt.QLabel("TEST")
+        self.testLabel2 = qt.QLabel("TEST2")
+
+        self.grid_layout.addWidget(self.testLabel)
+        self.grid_layout.addWidget(self.testLabel2)
+        self.testLabel.setStyleSheet(
+            "color:black; background-color:#6ea5ff; border: solid black;"
+        )
+        self.testLabel.setFixedSize(155, 100)
+
+        self.testLabel2.setPixmap(QPixmap("./src/120.jpg"))
+        self.testLabel2.setFixedSize(155, 100)
+        self.testLabel2.setScaledContents(True)
+
+
+        self.setLayout(self.grid_layout)
+        self.load_gallery()
+
+
+    def load_gallery(self):
+
+        # object {"image": "thumbnail": "date": "name": }
+        with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r") as f:
+            thumbnails = json.load(f)
+
+
+
 
 # bottom bar
 class BottomBar(qt.QWidget):
@@ -362,8 +409,7 @@ class MainWindow(qt.QMainWindow):
 
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
-        self.testLabel = qt.QLabel("TEST")
-        self.testLabel2 = qt.QLabel("TEST2")
+        self.gallery = Gallery(self.shared_data)
 
         self.initUi()
 
@@ -375,20 +421,8 @@ class MainWindow(qt.QMainWindow):
 
         # (left, top, right, bottom)
         v_box.setContentsMargins(0, 0, 0, 0)
-
-        # test
         v_box.addWidget(self.top_bar)
-        v_box.addWidget(self.testLabel)
-        v_box.addWidget(self.testLabel2)
-
-        self.testLabel.setStyleSheet(
-            "color:black; background-color:#6ea5ff; border: solid black;"
-        )
-        self.testLabel.setFixedSize(155, 100)
-
-        self.testLabel2.setPixmap(QPixmap("./src/120.jpg"))
-        self.testLabel2.setFixedSize(155, 100)
-        self.testLabel2.setScaledContents(True)
+        v_box.addWidget(self.gallery)
 
         v_box.addStretch()  # Pushes to bottom
         # bottom-bar
