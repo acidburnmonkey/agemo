@@ -9,12 +9,12 @@
 - Hyprland
 - UV
 
-# Important for first run ⚠️
+## V2 is a complete rewrite 1000% more efficient
 
-- select source button and restart the application
-- now wait , is doing work <br>
-  if you have over 800 images in that directory it will take some time for the program to index them
-  it will create this file when is done : ~.local/share/agemo/thumbnail_cache.json
+- Now using pyQt6 over tkinter , Qt is multi threaded and compiled from c++ , in contrast tkinter is single threaded and all bindidg libraries
+  are in python.New engene can handle thousands of images at the same time without freezing.
+- No longer generating thumbnails , instead it fetches them from $XDG avoids making wrtites to the drive.
+- Using uv over pip.
 
 ## Install
 

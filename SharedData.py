@@ -8,13 +8,18 @@ class SharedData:
     @ self.data => default_settings {dict}
     @ self.thumbnails_data => json
     @ self.script_path => gets the directory of this program
+    @self.selectedImage -> shared at runtime
+
     """
 
     def __init__(self):
+
+        self.selectedImage = None
+
         self.script_path = os.path.join(os.path.dirname(__file__))
         self.data = self.load_settings()
         self.check_monitors()
-        self.thumbnails_data = self.load_thubnailer_data()
+        # self.thumbnails_data = self.load_xdgcache()
 
     def load_settings(self):
         default_settings = {
@@ -55,9 +60,10 @@ class SharedData:
         except Exception as e:
             print(e)
 
-    def load_thubnailer_data(self):
+    # unused check if needed or mk @classmethod
+    def load_xdgcache(self):
         try:
-            with open(os.path.join(self.script_path, "thumbnail_cache.json"), "r") as f:
+            with open(os.path.join(self.script_path, "xdgcache.json"), "r") as f:
                 return json.load(f)
         except FileNotFoundError:
             print("Error: Configuration file not found.")

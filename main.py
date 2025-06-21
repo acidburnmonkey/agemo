@@ -9,11 +9,14 @@
 import sys
 import os
 import json
+import subprocess
+import time
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment, pyqtSignal
 from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
+from HyprParser import HyprParser
 
 
 ## Gallery
@@ -91,8 +94,9 @@ class Gallery(qt.QWidget):
 
         # remember
         self.selected_label = lbl
+        self.shared_data.selectedImage = lbl.property('image')
         print("label:", lbl.property("image"))
-        print("coordinates :", lbl.property("coordinates"))
+        # print("coordinates :", lbl.property("coordinates"))
 
 
 class ClickableLabel(qt.QLabel):
@@ -108,13 +112,15 @@ class ClickableLabel(qt.QLabel):
 
 # bottom bar
 class BottomBar(qt.QWidget):
-    def __init__(self, shared_data=None, parent=None):
+    def __init__(self, shared_data, parent=None):
         super().__init__(parent)
 
         self.monitors = shared_data.data["monitors"]
+        self.shared_data = shared_data
 
         # buttons
-        self.apply = qt.QPushButton("Apply")
+        self.applyButton = qt.QPushButton("Apply")
+        self.applyButton.clicked.connect(self.apply)
         self.monitors_select = qt.QComboBox()
         self.monitors_select.addItems(self.monitors)
         self.current_monitor = self.monitors[0]
@@ -125,7 +131,7 @@ class BottomBar(qt.QWidget):
         # Layout and  frame
         self.bframe = qt.QFrame(self)
         self.b_layout = qt.QHBoxLayout(self.bframe)
-        self.b_layout.addWidget(self.apply)
+        self.b_layout.addWidget(self.applyButton)
         self.b_layout.addWidget(self.monitors_select)
 
         # mainLayout
@@ -144,13 +150,27 @@ class BottomBar(qt.QWidget):
             "QFrame{border:1px solid #cad3f5; border-radius: 10px;}"
         )
 
-        self.apply.setFixedSize(80, 20)  # W , H
+        self.applyButton.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
         self.monitors_select.setObjectName("monitors_select")
 
     def select_monitor(self, selected):
         self.current_monitor = selected
-        print("self.current_monitor:", self.current_monitor)
+        print("selected > self.current_monitor:", self.current_monitor)
+
+
+    def apply(self):
+
+        if self.shared_data.selectedImage:
+            print("applying to :", self.current_monitor)
+            print('Image selected : ', self.shared_data.selectedImage)
+
+            HyprParser.hypr_write(self.shared_data.selectedImage,self.current_monitor)
+            subprocess.call(['kill','hyprpaper'])
+            time.sleep(1)
+            subprocess.Popen(['hyprpaper'])
+
+
 
 
 # Top bar
