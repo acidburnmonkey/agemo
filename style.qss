@@ -39,7 +39,7 @@ QScrollArea {
 }
 
 QScrollArea>QWidget {
-    background: #282a36;
+    background: #24273A;
 }
 
 QScrollBar:vertical {
@@ -89,11 +89,22 @@ QScrollBar::sub-page:horizontal {
 
 /* remove in between gride color */
 #galleryGridWidget {
-    background-color: #282a36;
+    background-color: #24273A;
 }
 
 #galleryGridWidget QLabel {
     background: transparent;
+}
+
+
+/* show the clicked labels */
+ClickableLabel {
+    border: none;
+}
+
+ClickableLabel[checked="true"] {
+    border: 2px solid red;
+    border-radius: 4px;
 }
 
 

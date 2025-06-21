@@ -10,7 +10,7 @@ import sys
 import os
 import json
 import PyQt6.QtWidgets as qt
-from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment
+from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment, pyqtSignal
 from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
@@ -21,15 +21,15 @@ class Gallery(qt.QWidget):
     def __init__(self, shared_data):
         super().__init__()
         self.shared_data = shared_data
-
+        self.selected_label = None
 
         # Create the scroll area and its inner widget
-        self.scroll_area   = qt.QScrollArea(self)
+        self.scroll_area = qt.QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
 
         self.scroll_widget = qt.QWidget()
         # grid_layout parent should be scroll_widget
-        self.grid_layout   = qt.QGridLayout(self.scroll_widget)
+        self.grid_layout = qt.QGridLayout(self.scroll_widget)
         self.grid_layout.setContentsMargins(0, 0, 0, 0)
         self.grid_layout.setHorizontalSpacing(5)
         self.grid_layout.setVerticalSpacing(5)
@@ -37,35 +37,35 @@ class Gallery(qt.QWidget):
         self.scroll_widget.setLayout(self.grid_layout)
         self.scroll_widget.setObjectName("galleryGridWidget")
         self.scroll_area.setWidget(self.scroll_widget)
-        self.scroll_area.setSizePolicy( qt.QSizePolicy.Policy.MinimumExpanding, qt.QSizePolicy.Policy.MinimumExpanding)
-
+        self.scroll_area.setSizePolicy(
+            qt.QSizePolicy.Policy.MinimumExpanding,
+            qt.QSizePolicy.Policy.MinimumExpanding,
+        )
 
         main_layout = qt.QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
         main_layout.addWidget(self.scroll_area)
 
-
         self.setLayout(main_layout)
-
         self.load_gallery()
 
-
     def load_gallery(self):
-
         # object {"image": "thumbnail": "date": "name": }
         with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r") as f:
             thumbnails = json.load(f)
 
+        for i, item in enumerate(thumbnails):
+            # print(i,item['thumbnail'])
 
-        for i , item in enumerate(thumbnails):
-            print(i,item['thumbnail'])
-
-            #each square
-            imageLabel = qt.QLabel()
-            imageLabel.setPixmap(QPixmap(item['thumbnail']))
-            imageLabel.setFixedSize(180,100)
+            # each square
+            imageLabel = ClickableLabel()
+            imageLabel.setPixmap(QPixmap(item["thumbnail"]))
+            imageLabel.setProperty("image", item["image"])
+            imageLabel.setFixedSize(180, 100)
             imageLabel.setScaledContents(True)
+
+            imageLabel.clicked.connect(self.getClick)
 
             # shadow effect
             shadow = qt.QGraphicsDropShadowEffect(self.scroll_widget)
@@ -76,9 +76,34 @@ class Gallery(qt.QWidget):
 
             # 5 columns
             row, col = divmod(i, 5)
+            imageLabel.setProperty("coordinates", (row, col))
             self.grid_layout.addWidget(imageLabel, row, col)
 
+    def getClick(self):
+        lbl = self.sender()
 
+        # clear the old border
+        if self.selected_label and self.selected_label is not lbl:
+            self.selected_label.setStyleSheet("")
+
+        #  set red border on the newly clicked label
+        lbl.setStyleSheet("border: 2px solid red; border-radius: 4px;")
+
+        # remember
+        self.selected_label = lbl
+        print("label:", lbl.property("image"))
+        print("coordinates :", lbl.property("coordinates"))
+
+
+class ClickableLabel(qt.QLabel):
+    """This just makes the labels Clickable , ignore lps sperging"""
+
+    clicked = pyqtSignal()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.clicked.emit()
+        super().mouseReleaseEvent(event)
 
 
 # bottom bar
@@ -115,7 +140,9 @@ class BottomBar(qt.QWidget):
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        self.bframe.setStyleSheet("QFrame{border:1px solid #cad3f5; border-radius: 10px;}")
+        self.bframe.setStyleSheet(
+            "QFrame{border:1px solid #cad3f5; border-radius: 10px;}"
+        )
 
         self.apply.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
@@ -288,7 +315,7 @@ class SettingsWindow(qt.QWidget):
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setObjectName("displaySettings")
         self.dpiLabel = qt.QLabel()
-        self.dpiLabel.setObjectName('dpiLabel')
+        self.dpiLabel.setObjectName("dpiLabel")
 
         # apply
         self.buttonScale = qt.QPushButton("Apply")
@@ -330,13 +357,26 @@ class SettingsWindow(qt.QWidget):
 
         # row=0, column=0, rowspan=1, colspan=3
         # Corrected: Add widgets to layout (not layout itself)
-        self.settingsLayout.addWidget( self.close_button, 0, 1, alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight,)
+        self.settingsLayout.addWidget(
+            self.close_button,
+            0,
+            1,
+            alignment=Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight,
+        )
         self.settingsLayout.addWidget(self.label, 0, 0)
-        self.settingsLayout.addWidget(self.checkBox, 1, 0,1,1)
-        self.settingsLayout.addWidget(self.dpiLabel, 1, 1,1,1)
-        self.settingsLayout.addWidget(self.slider, 2, 0,1, 2, alignment=Qt.AlignmentFlag.AlignHCenter)
-        self.settingsLayout.addWidget(self.buttonScale, 3, 0,1,2, alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom)
-
+        self.settingsLayout.addWidget(self.checkBox, 1, 0, 1, 1)
+        self.settingsLayout.addWidget(self.dpiLabel, 1, 1, 1, 1)
+        self.settingsLayout.addWidget(
+            self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
+        self.settingsLayout.addWidget(
+            self.buttonScale,
+            3,
+            0,
+            1,
+            2,
+            alignment=Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignBottom,
+        )
 
         # checkbox
         if self.shared_data.data["dpi"]:
@@ -351,13 +391,11 @@ class SettingsWindow(qt.QWidget):
         else:
             self.slider.setEnabled(False)
 
-
         ##END UI
         self.setLayout(self.settingsLayout)
 
     # Apply Settings
     def scaleNow(self):
-
         if self.shared_data.data["dpi"] and self.checkBox.isChecked():
             # write to config file
             with open(
@@ -386,12 +424,11 @@ class SettingsWindow(qt.QWidget):
             qt.QApplication.quit()
 
         elif not self.checkBox.isChecked():
-            self.shared_data.data['dpi'] = None
+            self.shared_data.data["dpi"] = None
             with open(
                 os.path.join(self.shared_data.script_path, "agemo.json"), "w"
             ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
-
 
     def slide(self, i):
         val = 1.0 + i * 0.5
