@@ -51,7 +51,8 @@ class Gallery(qt.QWidget):
         main_layout.addWidget(self.scroll_area)
 
         self.setLayout(main_layout)
-        self.load_gallery()
+        if self.shared_data.data['wallpapers_dir']:
+            self.load_gallery()
 
     def load_gallery(self):
         # object {"image": "thumbnail": "date": "name": }
@@ -480,6 +481,8 @@ class MainWindow(qt.QMainWindow):
         print(
             "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
         )
+
+        xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
