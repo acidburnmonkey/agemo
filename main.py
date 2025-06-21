@@ -22,36 +22,31 @@ class Gallery(qt.QWidget):
         super().__init__()
         self.shared_data = shared_data
 
-        # Layouts
-        self.grid_layout = qt.QGridLayout(self)
-        self.grid_layout.setContentsMargins(0,0,0,0)
 
-        # Scroll Area
-        self.scroll_area = qt.QScrollArea()
-        self.scroll_widget = qt.QWidget()
-        self.scroll_widget.setLayout(self.grid_layout)
-        self.scroll_area.setWidget(self.scroll_widget)
+        # Create the scroll area and its inner widget
+        self.scroll_area   = qt.QScrollArea(self)
         self.scroll_area.setWidgetResizable(True)
 
-        # Add widgets to main layout
+        self.scroll_widget = qt.QWidget()
+        # grid_layout parent should be scroll_widget
+        self.grid_layout   = qt.QGridLayout(self.scroll_widget)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
+        self.grid_layout.setHorizontalSpacing(5)
+        self.grid_layout.setVerticalSpacing(5)
 
-        ### TEST
-        self.testLabel = qt.QLabel("TEST")
-        self.testLabel2 = qt.QLabel("TEST2")
-
-        self.grid_layout.addWidget(self.testLabel)
-        self.grid_layout.addWidget(self.testLabel2)
-        self.testLabel.setStyleSheet(
-            "color:black; background-color:#6ea5ff; border: solid black;"
-        )
-        self.testLabel.setFixedSize(155, 100)
-
-        self.testLabel2.setPixmap(QPixmap("./src/120.jpg"))
-        self.testLabel2.setFixedSize(155, 100)
-        self.testLabel2.setScaledContents(True)
+        self.scroll_widget.setLayout(self.grid_layout)
+        self.scroll_area.setWidget(self.scroll_widget)
+        self.scroll_area.setSizePolicy( qt.QSizePolicy.Policy.MinimumExpanding, qt.QSizePolicy.Policy.MinimumExpanding)
 
 
-        self.setLayout(self.grid_layout)
+        main_layout = qt.QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+        main_layout.addWidget(self.scroll_area)
+
+
+        self.setLayout(main_layout)
+
         self.load_gallery()
 
 
@@ -60,6 +55,20 @@ class Gallery(qt.QWidget):
         # object {"image": "thumbnail": "date": "name": }
         with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r") as f:
             thumbnails = json.load(f)
+
+
+        for i , item in enumerate(thumbnails):
+            print(i,item['thumbnail'])
+
+            #each square
+            imageLabel = qt.QLabel()
+            imageLabel.setPixmap(QPixmap(item['thumbnail']))
+            imageLabel.setFixedSize(180,100)
+            imageLabel.setScaledContents(True)
+
+            # 5 columns
+            row, col = divmod(i, 5)
+            self.grid_layout.addWidget(imageLabel, row, col)
 
 
 
@@ -98,7 +107,7 @@ class BottomBar(qt.QWidget):
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        self.bframe.setStyleSheet("QFrame{border:1px solid blue; border-radius: 10px;}")
+        self.bframe.setStyleSheet("QFrame{border:1px solid #cad3f5; border-radius: 10px;}")
 
         self.apply.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
@@ -139,7 +148,7 @@ class TopBar(qt.QWidget):
     def initUI(self):
         self.tlayout = qt.QHBoxLayout(self)
 
-        self.tlayout.setContentsMargins(10, 0, 0, 0)
+        self.tlayout.setContentsMargins(0, 0, 0, 0)
         # settings
         self.tlayout.addWidget(self.settings)
         self.tlayout.addWidget(self.sources)
@@ -418,13 +427,14 @@ class MainWindow(qt.QMainWindow):
         self.setCentralWidget(central_widget)
 
         v_box = qt.QVBoxLayout()
-
         # (left, top, right, bottom)
         v_box.setContentsMargins(0, 0, 0, 0)
-        v_box.addWidget(self.top_bar)
-        v_box.addWidget(self.gallery)
+        v_box.setSpacing(0)
 
-        v_box.addStretch()  # Pushes to bottom
+        v_box.addWidget(self.top_bar)
+        v_box.addWidget(self.gallery, 1)
+
+        # v_box.addStretch()  # Pushes to bottom
         # bottom-bar
         v_box.addWidget(self.bottom_bar)
 
