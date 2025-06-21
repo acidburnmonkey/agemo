@@ -27,6 +27,78 @@ MainWindow {
 
 }
 
+
+/* Grid */
+
+/*  The scroll‑area frame & viewport */
+QScrollArea {
+    border: none;
+    background: transparent;
+    padding: 0px;
+    margin: 0px;
+}
+
+QScrollArea>QWidget {
+    background: #282a36;
+}
+
+QScrollBar:vertical {
+    width: 8px;
+    background: transparent;
+    margin: 0px;
+}
+
+QScrollBar::handle:vertical {
+    background: #6272a4;
+    min-height: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::sub-line:vertical,
+QScrollBar::add-line:vertical {
+    height: 0px;
+}
+
+/*  Don’t color the page areas */
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    height: 8px;
+    background: transparent;
+    margin: 0px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #6272a4;
+    min-width: 20px;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+/* remove in between gride color */
+#galleryGridWidget {
+    background-color: #282a36;
+}
+
+#galleryGridWidget QLabel {
+    background: transparent;
+}
+
+
+
+
 /* end */
 
 QPushButton#close_button {

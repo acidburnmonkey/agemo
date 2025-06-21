@@ -11,7 +11,7 @@ import os
 import json
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
 
@@ -35,6 +35,7 @@ class Gallery(qt.QWidget):
         self.grid_layout.setVerticalSpacing(5)
 
         self.scroll_widget.setLayout(self.grid_layout)
+        self.scroll_widget.setObjectName("galleryGridWidget")
         self.scroll_area.setWidget(self.scroll_widget)
         self.scroll_area.setSizePolicy( qt.QSizePolicy.Policy.MinimumExpanding, qt.QSizePolicy.Policy.MinimumExpanding)
 
@@ -65,6 +66,13 @@ class Gallery(qt.QWidget):
             imageLabel.setPixmap(QPixmap(item['thumbnail']))
             imageLabel.setFixedSize(180,100)
             imageLabel.setScaledContents(True)
+
+            # shadow effect
+            shadow = qt.QGraphicsDropShadowEffect(self.scroll_widget)
+            shadow.setBlurRadius(12)
+            shadow.setOffset(3, 3)
+            shadow.setColor(QColor(0, 0, 0, 150))
+            imageLabel.setGraphicsEffect(shadow)
 
             # 5 columns
             row, col = divmod(i, 5)
