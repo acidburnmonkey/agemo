@@ -6,7 +6,8 @@ Name=Agemo
 Comment=Wallpaper GUI
 
 # installer will place $HOME in {}
-Exec=uv run {}/.local/share/agemo/agemo.py
+Path={}/.local/share/agemo
+Exec=/usr/bin/env uv run --project . agemo.py
 Icon={}/.local/share/agemo/assets/agemo.svg
 Terminal=false
 
