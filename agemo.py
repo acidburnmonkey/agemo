@@ -260,10 +260,9 @@ class TopBar(qt.QWidget):
             # fisrst time run here
             if (not bool(self.prev_wallpapers_dir)) and wallpapers_dir:
                 print("First time run:", not bool(self.prev_wallpapers_dir))
+                xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
-            elif wallpapers_dir:
-                xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
             #emit signal to gallery
             self.directoryChanged.emit(wallpapers_dir)
@@ -493,7 +492,9 @@ class MainWindow(qt.QMainWindow):
             "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
         )
 
-        xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
+        if self.shared_data.data["wallpapers_dir"]:
+            xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
+            xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
 
         self.bottom_bar = BottomBar(self.shared_data, self)
