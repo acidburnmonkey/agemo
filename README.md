@@ -8,12 +8,13 @@
 - Hyprpaper
 - Hyprland
 - UV
+- gdk-pixbuf-thumbnailer
 
-## V2 is a complete rewrite 1000% more efficient
+## 🚀 - V2 is a complete rewrite 1000% more efficient
 
-- Now using pyQt6 over tkinter , Qt is multi threaded and compiled from c++ , in contrast tkinter is single threaded and all bindidg libraries
-  are in python.New engene can handle thousands of images at the same time without freezing.
-- No longer generating thumbnails , instead it fetches them from $XDG avoids making wrtites to the drive.
+- Now using pyQt6 over tkinter , Qt is multi threaded and compiled from c++ , in contrast tkinter is single threaded and all bindings libraries
+  are in python.New engine can handle thousands of images at the same time without freezing.
+- No longer generating extra thumbnails , instead it fetches them from $XDG avoids making writes to the drive.
 - Using uv over pip.
 
 ## Install
@@ -24,7 +25,8 @@ clone the repo and run the script don’t need sudo
 ./install.sh
 ```
 
-To remove <br>
+To remove
+<br>
 
 ```
 ./uninstall.sh
@@ -32,7 +34,7 @@ To remove <br>
 
 ## Future updates
 
-- sorting images by date
+- sorting images by name
 - recursive indexing of directories
 
 <br>
