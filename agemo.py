@@ -56,9 +56,14 @@ class Gallery(qt.QWidget):
 
     def load_gallery(self):
 
-        # object {"image": "thumbnail": "date": "name": }
-        with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+") as f:
-            thumbnails = json.load(f)
+        try:
+            # object {"image": "thumbnail": "date": "name": }
+            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+") as f:
+                thumbnails = json.load(f)
+
+        except FileNotFoundError:
+            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "w"):
+                thumbnails = '[]'
 
 
         for i, item in enumerate(thumbnails):

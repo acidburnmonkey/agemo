@@ -1,5 +1,8 @@
 # Agemo is a Gui front end for Hyprpaper
 
+- Support for high DPI displays
+- wayland native
+
 ![](images/1.png)
 ![](images/2.png)
 

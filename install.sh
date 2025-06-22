@@ -12,3 +12,5 @@ cp agemo.desktop "$HOME/.local/share/applications/"
 
 chmod +x "$HOME/.local/share/agemo/agemo.py"
 echo 'Done ,agemo Installed on ~/.local/share/'
+
+echo 'if you get an error install uv  and run it from terminal: uv run $HOME/.local/share/agemo/agemo.py'
