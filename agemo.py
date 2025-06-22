@@ -100,6 +100,8 @@ class Gallery(qt.QWidget):
         # print("coordinates :", lbl.property("coordinates"))
 
 
+
+# subclass for Gallery
 class ClickableLabel(qt.QLabel):
     """This just makes the labels Clickable , ignore lps sperging"""
 
@@ -176,6 +178,10 @@ class BottomBar(qt.QWidget):
 
 # Top bar
 class TopBar(qt.QWidget):
+
+    # emit signal on dir change
+    directoryChanged = pyqtSignal(str)
+
     def __init__(self, shared_data=None, parent=None):
         super().__init__(parent)
 
@@ -237,9 +243,10 @@ class TopBar(qt.QWidget):
 
         self.prev_wallpapers_dir = self.shared_data.data["wallpapers_dir"]
 
+        # on select
         if wallpapers_dir:
-            self.shared_data.data["wallpapers_dir"] = wallpapers_dir
 
+            self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
             with open(
@@ -247,15 +254,19 @@ class TopBar(qt.QWidget):
             ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
-            # start indexing
+            #emit signal to gallery
+            self.directoryChanged.emit(wallpapers_dir)
+
             # fisrst time run here
             if (not bool(self.prev_wallpapers_dir)) and wallpapers_dir:
-                # self.first_time_run(total) # Implement the loading bar other way
                 print("First time run:", not bool(self.prev_wallpapers_dir))
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
             elif wallpapers_dir:
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
+
+            #emit signal to gallery
+            self.directoryChanged.emit(wallpapers_dir)
 
             ## Debug
             print("Total images on wallpaper dir:", total)
@@ -484,9 +495,13 @@ class MainWindow(qt.QMainWindow):
 
         xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
+
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
         self.gallery = Gallery(self.shared_data)
+
+        self.top_bar.directoryChanged.connect(self.reloadGallery)
+
 
         self.initUi()
 
@@ -507,6 +522,18 @@ class MainWindow(qt.QMainWindow):
         v_box.addWidget(self.bottom_bar)
 
         central_widget.setLayout(v_box)
+
+    def reloadGallery(self, newDir):
+
+        print('new dir emitted:', newDir)
+        #take the old gallery out of the layout
+        layout = self.centralWidget().layout()
+        layout.removeWidget(self.gallery)
+
+        self.gallery.deleteLater()
+        self.gallery = Gallery(self.shared_data)
+        layout.insertWidget(1, self.gallery, stretch=1)
+
 
 
 def main():
