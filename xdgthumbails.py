@@ -19,13 +19,12 @@ def is_image(path: str) -> bool:
     except Exception:
         return False
 
+
 # generate missig thumbnails
 def generate_with_cli(src, size, dst):
-    subprocess.run([
-        "gdk-pixbuf-thumbnailer",
-        "--size", str(size),
-        src, dst
-    ], check=False)
+    subprocess.run( ["gdk-pixbuf-thumbnailer", "--size", str(size), src, dst], check=False)
+
+
 
 def calculate_md5(path: str) -> str:
     abs_path = os.path.abspath(path)
@@ -74,35 +73,30 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
             # new or modified
             thumb_name = calculate_md5(full)
             thumb_path = find_thumbnail(thumb_name)
-            new_entries.append({
-                "image": full,
-                "thumbnail": thumb_path,
-                "date": mod_date,
-                "name": fn
-            })
+            new_entries.append(
+                {"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn}
+            )
             changed = True
 
     # generate missing thumbnails
-    for entry in new_entries:
-        if not entry["thumbnail"]:
-            thumb_name = calculate_md5(entry["image"])
-            dst = os.path.join(THUMB_ROOT, "normal", thumb_name)
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
+    # for entry in new_entries:
+    #     if not entry["thumbnail"]:
+    #         thumb_name = calculate_md5(entry["image"])
+    #         dst = os.path.join(THUMB_ROOT, "normal", thumb_name)
+    #         os.makedirs(os.path.dirname(dst), exist_ok=True)
 
-            generate_with_cli(entry["image"], 128, dst)
-            if os.path.exists(dst):
-                entry["thumbnail"] = dst
-
+    #         generate_with_cli(entry["image"], 128, dst)
+    #         if os.path.exists(dst):
+    #             entry["thumbnail"] = dst
 
     # new_entries.sort(key=lambda e: e["name"].lower())
     new_entries.sort(key=lambda e: e["date"])
     new_entries.reverse()
 
-    #if nothing changed return
+    # if nothing changed return
     if not changed and len(new_entries) == len(existing):
         print("Cache already up to date.")
         return
-
 
     # write updated cache
     with open(cache_file, "w", encoding="utf-8") as f:
@@ -110,34 +104,29 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
     print(f"Cache updated: {len(new_entries)} entries.")
 
 
-
-
 # force populate thubnails
-def call_xdg(img_dir: str, size: int = 128):
-    cache_dir = os.path.expanduser("~/.cache/thumbnails/normal")
+def call_xdg(img_dir: str, size: int = 256):
+    cache_dir = os.path.expanduser("~/.cache/thumbnails/large/")
     os.makedirs(cache_dir, exist_ok=True)
 
     for fn in os.listdir(img_dir):
-        if not fn.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')):
+        if not fn.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
             continue
 
         img_path = os.path.join(img_dir, fn)
 
-        uri = 'file://' + urllib.parse.quote(img_path)
-        name = hashlib.md5(uri.encode('utf-8')).hexdigest() + '.png'
+        uri = "file://" + urllib.parse.quote(img_path)
+        name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
-        #only thumbnail if missing
+        # only thumbnail if missing
         if not os.path.exists(out):
-            subprocess.run([
-                'gdk-pixbuf-thumbnailer',
-                '--size', str(size),
-                img_path,
-                out
-            ], check=False)
-
+            subprocess.run(
+                ["gdk-pixbuf-thumbnailer", "--size", str(size), img_path, out],
+                check=False,
+            )
 
 
 if __name__ == "__main__":
     ligma("/path/to/images")
-    call_xdg('/path/to/images')
+    call_xdg("/path/to/images")

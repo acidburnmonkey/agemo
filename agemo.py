@@ -55,9 +55,11 @@ class Gallery(qt.QWidget):
             self.load_gallery()
 
     def load_gallery(self):
+
         # object {"image": "thumbnail": "date": "name": }
-        with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r") as f:
+        with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+") as f:
             thumbnails = json.load(f)
+
 
         for i, item in enumerate(thumbnails):
             # print(i,item['thumbnail'])
@@ -530,6 +532,9 @@ class MainWindow(qt.QMainWindow):
         #take the old gallery out of the layout
         layout = self.centralWidget().layout()
         layout.removeWidget(self.gallery)
+
+        xdgthumbails.call_xdg(newDir)
+        xdgthumbails.ligma(newDir)
 
         self.gallery.deleteLater()
         self.gallery = Gallery(self.shared_data)
