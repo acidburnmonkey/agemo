@@ -51,20 +51,20 @@ class Gallery(qt.QWidget):
         main_layout.addWidget(self.scroll_area)
 
         self.setLayout(main_layout)
-        if self.shared_data.data['wallpapers_dir']:
+        if self.shared_data.data["wallpapers_dir"]:
             self.load_gallery()
 
     def load_gallery(self):
-
         try:
             # object {"image": "thumbnail": "date": "name": }
-            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+") as f:
+            with open(
+                os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+"
+            ) as f:
                 thumbnails = json.load(f)
 
         except FileNotFoundError:
             with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "w"):
-                thumbnails = '[]'
-
+                thumbnails = "[]"
 
         for i, item in enumerate(thumbnails):
             # print(i,item['thumbnail'])
@@ -102,10 +102,9 @@ class Gallery(qt.QWidget):
 
         # remember
         self.selected_label = lbl
-        self.shared_data.selectedImage = lbl.property('image')
+        self.shared_data.selectedImage = lbl.property("image")
         print("label:", lbl.property("image"))
         # print("coordinates :", lbl.property("coordinates"))
-
 
 
 # subclass for Gallery
@@ -168,24 +167,19 @@ class BottomBar(qt.QWidget):
         self.current_monitor = selected
         print("selected > self.current_monitor:", self.current_monitor)
 
-
     def apply(self):
-
         if self.shared_data.selectedImage:
             print("applying to :", self.current_monitor)
-            print('Image selected : ', self.shared_data.selectedImage)
+            print("Image selected : ", self.shared_data.selectedImage)
 
-            HyprParser.hypr_write(self.shared_data.selectedImage,self.current_monitor)
-            subprocess.call(['kill','hyprpaper'])
+            HyprParser.hypr_write(self.shared_data.selectedImage, self.current_monitor)
+            subprocess.call(["kill", "hyprpaper"])
             time.sleep(1)
-            subprocess.Popen(['hyprpaper'])
-
-
+            subprocess.Popen(["hyprpaper"])
 
 
 # Top bar
 class TopBar(qt.QWidget):
-
     # emit signal on dir change
     directoryChanged = pyqtSignal(str)
 
@@ -252,7 +246,6 @@ class TopBar(qt.QWidget):
 
         # on select
         if wallpapers_dir:
-
             self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
@@ -261,7 +254,7 @@ class TopBar(qt.QWidget):
             ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
-            #emit signal to gallery
+            # emit signal to gallery
             self.directoryChanged.emit(wallpapers_dir)
 
             # fisrst time run here
@@ -270,8 +263,7 @@ class TopBar(qt.QWidget):
                 xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
-
-            #emit signal to gallery
+            # emit signal to gallery
             self.directoryChanged.emit(wallpapers_dir)
 
             ## Debug
@@ -364,13 +356,12 @@ class SettingsWindow(qt.QWidget):
 
         try:
             self.scaleFactor = os.environ["QT_SCALE_FACTOR"]
+            if self.scaleFactor:
+                self.label.setText(f"""You already have scaling set on environment :
+                                   $QT_SCALE_FACTOR: {self.scaleFactor}
+                                   """)
         except Exception as e:
-            print(self.scaleFactor, e)
-
-        if self.scaleFactor:
-            self.label.setText(f"""You already have scaling set on environment :
-                                  $QT_SCALE_FACTOR: {self.scaleFactor}
-                               """)
+            print("err at self.scaleFactor", e)
 
     # UI
     def initUI(self):
@@ -503,13 +494,11 @@ class MainWindow(qt.QMainWindow):
             xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
             xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
-
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
         self.gallery = Gallery(self.shared_data)
 
         self.top_bar.directoryChanged.connect(self.reloadGallery)
-
 
         self.initUi()
 
@@ -532,9 +521,8 @@ class MainWindow(qt.QMainWindow):
         central_widget.setLayout(v_box)
 
     def reloadGallery(self, newDir):
-
-        print('new dir emitted:', newDir)
-        #take the old gallery out of the layout
+        print("new dir emitted:", newDir)
+        # take the old gallery out of the layout
         layout = self.centralWidget().layout()
         layout.removeWidget(self.gallery)
 
@@ -544,7 +532,6 @@ class MainWindow(qt.QMainWindow):
         self.gallery.deleteLater()
         self.gallery = Gallery(self.shared_data)
         layout.insertWidget(1, self.gallery, stretch=1)
-
 
 
 def main():
