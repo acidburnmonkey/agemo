@@ -1,7 +1,7 @@
 [Desktop Entry]
 
 Type=Application
-Version=2.0
+Version=2.1.0
 Name=Agemo
 Comment=Wallpaper GUI
 
@@ -10,4 +10,4 @@ Path={}/.local/share/agemo
 Exec=/usr/bin/env uv run --project . agemo.py
 Icon={}/.local/share/agemo/assets/agemo.svg
 Terminal=false
-
+Keywords=wallpaper;hyprpaper
