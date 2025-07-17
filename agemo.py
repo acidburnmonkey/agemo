@@ -173,10 +173,13 @@ class BottomBar(qt.QWidget):
             print("applying to :", self.current_monitor)
             print("Image selected : ", self.shared_data.selectedImage)
 
-            HyprParser.hypr_write(self.shared_data.selectedImage, self.current_monitor)
-            subprocess.call(["kill", "hyprpaper"])
-            time.sleep(1)
-            subprocess.Popen(["hyprpaper"])
+            try:
+                HyprParser.hypr_write(self.shared_data.selectedImage, self.current_monitor)
+                subprocess.call(["kill", "hyprpaper"])
+                time.sleep(1)
+                subprocess.Popen(["hyprpaper"])
+            except FileNotFoundError:
+                print('⛔ Hyprpaper is not installed')
 
 
 # Top bar
