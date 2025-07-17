@@ -294,7 +294,7 @@ class TopBar(qt.QWidget):
 
         # link
         description = qt.QLabel("https://github.com/acidburnmonkey/agemo", dwindow)
-        version = qt.QLabel("version 2.0", dwindow)
+        version = qt.QLabel("version 2.1.0", dwindow)
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         abox.addWidget(description)
         abox.addWidget(version)
