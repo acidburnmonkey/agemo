@@ -63,8 +63,9 @@ class Gallery(qt.QWidget):
                 thumbnails = json.load(f)
 
         except FileNotFoundError:
-            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "w"):
-                thumbnails = "[]"
+            thumbnails = []
+            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "w") as f:
+                f.write('[]')
 
         for i, item in enumerate(thumbnails):
             # print(i,item['thumbnail'])
