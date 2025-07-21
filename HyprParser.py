@@ -25,12 +25,9 @@ class HyprParser:
         ipc = ipc_status.group(1) if ipc_status else None
 
         # Extract monitors
-        monitor_stats = monitor_pattern.findall(
-            config
-        )  # findall returns all matches as a list
+        monitor_stats = monitor_pattern.findall(config)
         monitors = monitor_stats if monitor_stats else []
 
-        # Return extracted values
         return splash, ipc, monitors
 
     @classmethod
@@ -58,7 +55,6 @@ class HyprParser:
                             """
                 file.write(template)
 
-
         try:
             with open(config_file, "r") as file:
                 lines = file.readlines()
@@ -66,7 +62,6 @@ class HyprParser:
             preload_pattern = re.compile(r"^preload\s*=\s*(.+)$")
             wallpaper_pattern = re.compile(r"^wallpaper\s*=\s*([^,]+),(.*)$")
 
-            # Extract preload and wallpaper data
             preloads = set()
             wallpapers = {}
             other_lines = []
@@ -85,10 +80,8 @@ class HyprParser:
             wallpapers[target_monitor] = image_path
 
             # Synchronize preload with wallpapers
-            preloads = {
-                path for path in preloads if path in wallpapers.values()
-            }  # Keep only valid paths
-            preloads.add(image_path)  # Ensure the new wallpaper is preloaded
+            preloads = {path for path in preloads if path in wallpapers.values()}
+            preloads.add(image_path)
 
             # Write the updated configuration back to the file
             with open(config_file, "w") as file:
