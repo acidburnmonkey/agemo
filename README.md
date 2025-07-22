@@ -22,13 +22,23 @@
 
 ## Install
 
+(recommended method) <br>
 clone the repo and run the script don’t need sudo
 
 ```
 ./install.sh
 ```
 
-To remove
+## AUR
+
+```
+yay -S agemo
+```
+
+If you install from the aur it must run from the terminal first time `agemo` , then it will create the .desktop and venv
+
+## To remove
+
 <br>
 
 ```
