@@ -14,39 +14,46 @@ sha256sums=('SKIP')
 package() {
   cd "$srcdir/$pkgname-$pkgver"
 
+  # Install everything to /usr/share/agemo
   install -dm755 "$pkgdir/usr/share/agemo"
   cp -r assets agemo.json *.py style.qss pyproject.toml uv.lock agemo.desktop "$pkgdir/usr/share/agemo"
 
+  # Install icon if available
   install -Dm644 assets/agemo.svg "$pkgdir/usr/share/icons/hicolor/scalable/apps/agemo.svg"
 
+  # Install wrapper to /usr/bin/agemo
   install -Dm755 /dev/stdin "$pkgdir/usr/bin/agemo" <<'EOF'
 #!/bin/bash
-PROJECT_DIR="/usr/share/agemo"
-VENV_DIR="$HOME/.cache/agemo/venv"
 
-if [ ! -d "$VENV_DIR" ]; then
-  echo "[agemo] Creating virtual environment in $VENV_DIR"
-  mkdir -p "$VENV_DIR"
-  uv venv --venv "$VENV_DIR" "$PROJECT_DIR"
-  uv pip install --venv "$VENV_DIR" "$PROJECT_DIR"
-fi
+DEST="$HOME/.local/share/agemo"
+DESKTOP="$HOME/.local/share/applications/agemo.desktop"
 
-exec uv venv run --venv "$VENV_DIR" -- python "$PROJECT_DIR/agemo.py" "$@"
-EOF
+if [ ! -d "$DEST" ]; then
+  echo "[agemo] First run: installing to $DEST"
+  mkdir -p "$DEST"
+  cp -r /usr/share/agemo/* "$DEST"
+  chmod +x "$DEST/agemo.py"
 
-  # Generate .desktop file for system launcher
-  install -Dm644 /dev/stdin "$pkgdir/usr/share/applications/agemo.desktop" <<EOF
+  mkdir -p "$(dirname "$DESKTOP")"
+  cat > "$DESKTOP" <<EOF_EOF
 [Desktop Entry]
 Type=Application
-Version=${pkgver}
+Version=2.1.0
 Name=Agemo
-Comment=Wallpaper GUI for Hyprpaper
-Path=/usr/share/agemo
-Exec=/usr/bin/agemo
-Icon=agemo
+Comment=Wallpaper GUI
+Path=$DEST
+Exec=/usr/bin/env uv run --project . agemo.py
+Icon=$DEST/assets/agemo.svg
 Terminal=false
 Keywords=wallpaper;hyprpaper
 Categories=Utility;
+EOF_EOF
+  echo "[agemo] Desktop shortcut created at $DESKTOP"
+fi
+
+cd "$DEST"
+exec uv run --project . agemo.py "$@"
 EOF
 }
+
 
