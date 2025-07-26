@@ -6,6 +6,7 @@
 #  https://github.com/acidburnmonkey
 #
 
+
 import sys
 import os
 import json
@@ -18,6 +19,7 @@ import xdgthumbails
 from SharedData import SharedData
 from HyprParser import HyprParser
 
+GLOBAL_VERSION = '2.2.0'
 
 ## Gallery
 class Gallery(qt.QWidget):
@@ -296,8 +298,9 @@ class TopBar(qt.QWidget):
         )
 
         # link
+        global GLOBAL_VERSION
         description = qt.QLabel("https://github.com/acidburnmonkey/agemo", dwindow)
-        version = qt.QLabel("version 2.1.0", dwindow)
+        version = qt.QLabel(GLOBAL_VERSION, dwindow)
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
         abox.addWidget(description)
         abox.addWidget(version)
