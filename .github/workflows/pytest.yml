@@ -2,17 +2,10 @@ name: Pytest
 
 on:
   push:
-    paths:
-      - '**/*.py'
-      - 'tests/**'
   pull_request:
-    paths:
-      - '**/*.py'
-      - 'tests/**'
 
 jobs:
   test:
-    # Use a Fedora container for testing environment
     runs-on: ubuntu-latest
     container:
       image: fedora:latest
@@ -36,16 +29,10 @@ jobs:
 
       - name: Install Python packages
         run: |
-          # Python, OpenGL/EGL, and Qt Wayland plugin
-          dnf install -y python3 python3-pip \
-                         mesa-libGL mesa-libEGL \
-                         qt6-qtwayland
+          dnf install -y python3 python3-pip mesa-libGL mesa-libEGL qt6-qtwayland
           dnf clean all
-
-      - name: Install Python packages
-        run: |
           python3 -m pip install --upgrade pip
           pip install pillow pyqt6 pytest
 
       - name: Run tests
-        run: pytest tests/
+        run: QT_QPA_PLATFORM=offscreen XDG_SESSION_TYPE=wayland pytest tests/
