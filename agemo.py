@@ -1,11 +1,8 @@
 #!/bin/python3
 
-
 # pyright: reportOptionalMemberAccess=none
 #
 #  https://github.com/acidburnmonkey
-#
-
 
 import sys
 import os
@@ -20,6 +17,9 @@ from SharedData import SharedData
 from HyprParser import HyprParser
 
 GLOBAL_VERSION = '2.2.0'
+ROOT_DIR = os.path.join(os.path.dirname(__file__)) # dev
+# ROOT_DIR = os.path.join(os.path.expanduser("~"),'.local/share/agemo/' ) # release
+
 
 ## Gallery
 class Gallery(qt.QWidget):
@@ -60,13 +60,13 @@ class Gallery(qt.QWidget):
         try:
             # object {"image": "thumbnail": "date": "name": }
             with open(
-                os.path.join(os.path.dirname(__file__), "xdgcache.json"), "r+"
+                os.path.join(ROOT_DIR, "xdgcache.json"), "r+"
             ) as f:
                 thumbnails = json.load(f)
 
         except FileNotFoundError:
             thumbnails = []
-            with open(os.path.join(os.path.dirname(__file__), "xdgcache.json"), "w") as f:
+            with open(os.path.join(ROOT_DIR, "xdgcache.json"), "w") as f:
                 f.write('[]')
 
         for i, item in enumerate(thumbnails):
@@ -372,7 +372,7 @@ class SettingsWindow(qt.QWidget):
 
     # UI
     def initUI(self):
-        script_path = os.path.join(os.path.dirname(__file__), "style.qss")
+        script_path = os.path.join(ROOT_DIR, "style.qss")
         with open(script_path, "r") as f:
             qss = f.read()
 
@@ -543,7 +543,7 @@ class MainWindow(qt.QMainWindow):
 
 def main():
     # check for preset DPI
-    with open(os.path.join(os.path.dirname(__file__), "agemo.json"), "r") as f:
+    with open(os.path.join(ROOT_DIR, "agemo.json"), "r") as f:
         data = json.load(f)
         # print('data[dpi]:',data['dpi'])
 
@@ -555,7 +555,7 @@ def main():
     window = MainWindow()
     window.setWindowTitle("Agemo")
 
-    script_path = os.path.join(os.path.dirname(__file__), "style.qss")
+    script_path = os.path.join(ROOT_DIR, "style.qss")
     with open(script_path, "r") as f:
         qss = f.read()
 

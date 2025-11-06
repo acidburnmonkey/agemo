@@ -14,9 +14,10 @@ class SharedData:
 
     def __init__(self):
 
-        self.selectedImage = None
+        self.script_path = os.path.join(os.path.dirname(__file__)) #dev
+        # self.script_path = os.path.join(os.path.expanduser("~"),'.local/share/agemo/' ) # release
 
-        self.script_path = os.path.join(os.path.dirname(__file__))
+        self.selectedImage = None
         self.data = self.load_settings()
         self.check_monitors()
         # self.thumbnails_data = self.load_xdgcache()
