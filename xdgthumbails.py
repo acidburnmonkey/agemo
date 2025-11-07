@@ -28,7 +28,7 @@ def is_image(path: str) -> bool:
 
 def calculate_md5(path: str) -> str:
     abs_path = os.path.abspath(path)
-    uri = "file://" + urllib.parse.quote(abs_path,safe='/')
+    uri = "file://" + urllib.parse.quote(abs_path, safe='/')
     return hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
 
 
@@ -78,7 +78,6 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
             new_entries.append({"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn})
             changed = True
 
-
     # new_entries.sort(key=lambda e: e["name"].lower())
     new_entries.sort(key=lambda e: e["date"])
     new_entries.reverse()
@@ -96,7 +95,6 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
 
 # force populate thubnails
 def call_xdg(img_dir: str, size: int = 256):
-
     try:
         thumbnailer = get_thumbnailer()
         if thumbnailer is None:
@@ -105,7 +103,6 @@ def call_xdg(img_dir: str, size: int = 256):
         exit(1)
 
     print("Generating thumbnails using:", thumbnailer)
-
 
     cache_dir = os.path.expanduser("~/.cache/thumbnails/large/")
     os.makedirs(cache_dir, exist_ok=True)
@@ -120,7 +117,7 @@ def call_xdg(img_dir: str, size: int = 256):
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
-        #DEBUG
+        # DEBUG
         print("Out:", out)
 
         # only thumbnail if missing
@@ -133,8 +130,7 @@ def call_xdg(img_dir: str, size: int = 256):
 
             #  glycin-thumbnailer -i file://$(pwd)/1.png -o /tmp/new.png -s 256
             elif thumbnailer == "glycin-thumbnailer":
-                subprocess.run( ["glycin-thumbnailer",'-i',"file://"+img_path ,'-o',out, '-s',str(size)])
-
+                subprocess.run(["glycin-thumbnailer", '-i', "file://" + img_path, '-o', out, '-s', str(size)])
 
 
 def get_thumbnailer():
@@ -148,11 +144,7 @@ def get_thumbnailer():
         return False
 
 
-
 if __name__ == "__main__":
-
     img_dir = "exp/"
-
     call_xdg(img_dir)
-
     ligma(img_dir)

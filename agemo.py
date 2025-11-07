@@ -17,8 +17,14 @@ from SharedData import SharedData
 from HyprParser import HyprParser
 
 GLOBAL_VERSION = '2.2.0'
-ROOT_DIR = os.path.join(os.path.dirname(__file__)) # dev
-# ROOT_DIR = os.path.join(os.path.expanduser("~"),'.local/share/agemo/' ) # release
+
+# dev check
+dev_mode = os.path.exists(os.path.join(os.path.dirname(__file__), '.git'))
+
+if dev_mode:
+    ROOT_DIR = os.path.dirname(__file__)
+else:
+    ROOT_DIR = os.path.join(os.path.expanduser("~"), '.local/share/agemo/')
 
 
 ## Gallery
@@ -59,9 +65,7 @@ class Gallery(qt.QWidget):
     def load_gallery(self):
         try:
             # object {"image": "thumbnail": "date": "name": }
-            with open(
-                os.path.join(ROOT_DIR, "xdgcache.json"), "r+"
-            ) as f:
+            with open(os.path.join(ROOT_DIR, "xdgcache.json"), "r+") as f:
                 thumbnails = json.load(f)
 
         except FileNotFoundError:
@@ -158,9 +162,7 @@ class BottomBar(qt.QWidget):
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        self.bframe.setStyleSheet(
-            "QFrame{border:1px solid #cad3f5; border-radius: 10px;}"
-        )
+        self.bframe.setStyleSheet("QFrame{border:1px solid #cad3f5; border-radius: 10px;}")
 
         self.applyButton.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
@@ -255,9 +257,7 @@ class TopBar(qt.QWidget):
             self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
-            with open(
-                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
-            ) as f:
+            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # emit signal to gallery
@@ -402,9 +402,7 @@ class SettingsWindow(qt.QWidget):
         self.settingsLayout.addWidget(self.label, 0, 0)
         self.settingsLayout.addWidget(self.checkBox, 1, 0, 1, 1)
         self.settingsLayout.addWidget(self.dpiLabel, 1, 1, 1, 1)
-        self.settingsLayout.addWidget(
-            self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter
-        )
+        self.settingsLayout.addWidget(self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter)
         self.settingsLayout.addWidget(
             self.buttonScale,
             3,
@@ -434,9 +432,7 @@ class SettingsWindow(qt.QWidget):
     def scaleNow(self):
         if self.shared_data.data["dpi"] and self.checkBox.isChecked():
             # write to config file
-            with open(
-                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
-            ) as f:
+            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # build a QProcessEnvironment
@@ -461,9 +457,7 @@ class SettingsWindow(qt.QWidget):
 
         elif not self.checkBox.isChecked():
             self.shared_data.data["dpi"] = None
-            with open(
-                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
-            ) as f:
+            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
     def slide(self, i):
@@ -493,9 +487,7 @@ class MainWindow(qt.QMainWindow):
         # shared data
         self.shared_data = SharedData()
 
-        print(
-            "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
-        )
+        print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
 
         if self.shared_data.data["wallpapers_dir"]:
             xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])

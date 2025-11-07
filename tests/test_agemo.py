@@ -1,7 +1,7 @@
-
- #Add parent directory to sys.path
+# Add parent directory to sys.path
 import sys
 import os
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import json
@@ -15,14 +15,11 @@ from SharedData import SharedData
 
 app = QApplication([])
 
+
 @pytest.fixture
 def shared_data(tmp_path):
     sd = SharedData()
-    sd.data = {
-        "dpi": None,
-        "wallpapers_dir": str(tmp_path),
-        "monitors": ["HDMI-A-1"]
-    }
+    sd.data = {"dpi": None, "wallpapers_dir": str(tmp_path), "monitors": ["HDMI-A-1"]}
     sd.script_path = str(tmp_path)
     return sd
 

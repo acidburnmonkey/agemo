@@ -91,5 +91,3 @@ def test_call_xdg(monkeypatch, tmp_path):
     out1 = tmp_path / '.cache' / 'thumbnails' / 'large' / name1
     out1.parent.mkdir(parents=True, exist_ok=True)
     out1.write_bytes(b'')
-
-

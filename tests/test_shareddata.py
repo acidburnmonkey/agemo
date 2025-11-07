@@ -108,8 +108,8 @@ def test_ligma_creates_and_updates_cache(tmp_path, monkeypatch, capsys):
     img2 = wallpapers / 'img2.png'
     Image.new('RGB', (5, 5)).save(img2)
     # stub out thumbnail lookup and md5 calculation
-    monkeypatch.setattr(xdgthumbails, 'find_thumbnail', lambda name: '/thumbs/'+name)
-    monkeypatch.setattr(xdgthumbails, 'calculate_md5', lambda path: os.path.basename(path)+'.id.png')
+    monkeypatch.setattr(xdgthumbails, 'find_thumbnail', lambda name: '/thumbs/' + name)
+    monkeypatch.setattr(xdgthumbails, 'calculate_md5', lambda path: os.path.basename(path) + '.id.png')
     cache_file = tmp_path / 'cache.json'
     # first invocation: should create cache
     xdgthumbails.ligma(str(wallpapers), cache_file=str(cache_file))
@@ -134,7 +134,7 @@ def test_ligma_handles_invalid_json(tmp_path, monkeypatch, capsys):
     wallpapers = tmp_path / 'wall2'
     wallpapers.mkdir()
     img = wallpapers / 'i.jpg'
-    Image.new('RGB', (5,5)).save(img)
+    Image.new('RGB', (5, 5)).save(img)
     # write invalid JSON
     cache_file = tmp_path / 'badcache.json'
     cache_file.write_text('not a json')
@@ -145,4 +145,3 @@ def test_ligma_handles_invalid_json(tmp_path, monkeypatch, capsys):
     xdgthumbails.ligma(str(wallpapers), cache_file=str(cache_file))
     out = capsys.readouterr().out
     assert 'Cache updated' in out
-

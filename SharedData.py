@@ -2,6 +2,7 @@ import os
 import subprocess
 import json
 
+
 class SharedData:
     """
     This class load in memory data that the application uses
@@ -13,9 +14,13 @@ class SharedData:
     """
 
     def __init__(self):
+        # Dev check
+        dev_mode = os.path.exists(os.path.join(os.path.dirname(__file__), '.git'))
 
-        self.script_path = os.path.join(os.path.dirname(__file__)) #dev
-        # self.script_path = os.path.join(os.path.expanduser("~"),'.local/share/agemo/' ) # release
+        if dev_mode:
+            self.script_path = os.path.dirname(__file__)
+        else:
+            self.script_path = os.path.join(os.path.expanduser("~"), '.local/share/agemo/')
 
         self.selectedImage = None
         self.data = self.load_settings()
@@ -45,9 +50,7 @@ class SharedData:
 
     def check_monitors(self):
         try:
-            hypr_ctl = subprocess.run(
-                ["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True
-            )
+            hypr_ctl = subprocess.run(["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True)
             hold = json.loads(hypr_ctl.stdout)
 
             # returns list of monitor names
