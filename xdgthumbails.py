@@ -28,7 +28,7 @@ def is_image(path: str) -> bool:
 
 def calculate_md5(path: str) -> str:
     abs_path = os.path.abspath(path)
-    uri = "file://" + urllib.parse.quote(abs_path)  # simpler
+    uri = "file://" + urllib.parse.quote(abs_path,safe='/')
     return hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
 
 
@@ -116,7 +116,7 @@ def call_xdg(img_dir: str, size: int = 256):
 
         img_path = os.path.abspath(os.path.join(img_dir, fn))
 
-        uri = "file://" + urllib.parse.quote(img_path)
+        uri = "file://" + urllib.parse.quote(img_path, safe='/')
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
