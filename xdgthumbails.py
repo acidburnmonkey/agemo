@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import shutil
 import hashlib
 from PIL import Image
 import urllib.parse
@@ -11,6 +12,11 @@ THUMB_ROOT = os.path.expanduser("~/.cache/thumbnails")
 SIZES = ("normal", "large", "x-large", "xx-large")
 
 
+class NoThubnailerError(Exception):
+    def __init__(self):
+        print("No thubnailer detected on system (call_xdg) failed ")
+
+
 def is_image(path: str) -> bool:
     try:
         with Image.open(path) as img:
@@ -18,12 +24,6 @@ def is_image(path: str) -> bool:
         return True
     except Exception:
         return False
-
-
-# generate missig thumbnails
-def generate_with_cli(src, size, dst):
-    subprocess.run( ["gdk-pixbuf-thumbnailer", "--size", str(size), src, dst], check=False)
-
 
 
 def calculate_md5(path: str) -> str:
@@ -73,21 +73,9 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
             # new or modified
             thumb_name = calculate_md5(full)
             thumb_path = find_thumbnail(thumb_name)
-            new_entries.append(
-                {"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn}
-            )
+            new_entries.append({"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn})
             changed = True
 
-    # generate missing thumbnails
-    # for entry in new_entries:
-    #     if not entry["thumbnail"]:
-    #         thumb_name = calculate_md5(entry["image"])
-    #         dst = os.path.join(THUMB_ROOT, "normal", thumb_name)
-    #         os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-    #         generate_with_cli(entry["image"], 128, dst)
-    #         if os.path.exists(dst):
-    #             entry["thumbnail"] = dst
 
     # new_entries.sort(key=lambda e: e["name"].lower())
     new_entries.sort(key=lambda e: e["date"])
@@ -106,6 +94,15 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
 
 # force populate thubnails
 def call_xdg(img_dir: str, size: int = 256):
+
+    try:
+        tumbainer = get_thumbnailer()
+        if tumbainer is None:
+            raise NoThubnailerError
+    except NoThubnailerError:
+        exit(1)
+
+
     cache_dir = os.path.expanduser("~/.cache/thumbnails/large/")
     os.makedirs(cache_dir, exist_ok=True)
 
@@ -113,7 +110,7 @@ def call_xdg(img_dir: str, size: int = 256):
         if not fn.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
             continue
 
-        img_path = os.path.join(img_dir, fn)
+        img_path = os.path.abspath(os.path.join(img_dir, fn))
 
         uri = "file://" + urllib.parse.quote(img_path)
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
@@ -121,12 +118,31 @@ def call_xdg(img_dir: str, size: int = 256):
 
         # only thumbnail if missing
         if not os.path.exists(out):
-            subprocess.run(
-                ["gdk-pixbuf-thumbnailer", "--size", str(size), img_path, out],
-                check=False,
-            )
+            if tumbainer == "gdk-pixbuf-thumbnailer":
+                subprocess.run(
+                    ["gdk-pixbuf-thumbnailer", "--size", str(size), img_path, out],
+                    check=False,
+                )
+
+            #  glycin-thumbnailer -i file://$(pwd)/1.png -o /tmp/new.png -s 256
+            elif tumbainer == "glycin-thumbnailer":
+                subprocess.run( ["glycin-thumbnailer",'-i',"file://"+img_path ,'-o',out, '-s',str(size)], check=False,)
+
+
+
+def get_thumbnailer():
+    if shutil.which('gdk-pixbuf-thumbnailer'):
+        return 'gdk-pixbuf-thumbnailer'
+
+    elif shutil.which('glycin-thumbnailer'):
+        return 'glycin-thumbnailer'
+
+    else:
+        return False
+
+
 
 
 if __name__ == "__main__":
-    ligma("/path/to/images")
-    call_xdg("/path/to/images")
+    # ligma("/path/to/images")
+    call_xdg("./images/")
