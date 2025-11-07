@@ -118,7 +118,7 @@ def call_xdg(img_dir: str, size: int = 256):
         out = os.path.join(cache_dir, name)
 
         # DEBUG
-        print("Out:", out)
+        # print("Out:", out)
 
         # only thumbnail if missing
         if not os.path.exists(out):

@@ -145,6 +145,7 @@ fi
 echo ""
 echo "Installing agemo..."
 
+
 # Install agemo files
 mkdir -p "$HOME/.local/share/agemo"
 cp -r assets/ agemo.json *.py style.qss pyproject.toml uv.lock "$HOME/.local/share/agemo"

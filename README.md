@@ -11,7 +11,7 @@
 - Hyprpaper
 - Hyprland
 - UV
-- gdk-pixbuf-thumbnailer
+- gdk-pixbuf-thumbnailer or glycin-thumbnailer
 
 ## 🚀 - V2 is a complete rewrite 1000% more efficient
 
