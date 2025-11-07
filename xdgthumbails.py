@@ -28,7 +28,7 @@ def is_image(path: str) -> bool:
 
 def calculate_md5(path: str) -> str:
     abs_path = os.path.abspath(path)
-    uri = urllib.parse.urljoin("file:", urllib.parse.quote(abs_path))
+    uri = "file://" + urllib.parse.quote(abs_path)  # simpler
     return hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
 
 
@@ -42,6 +42,8 @@ def find_thumbnail(name: str) -> str:
 
 def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
     #  load existing cache
+    print("Loading Cache")
+
     if os.path.exists(cache_file):
         try:
             with open(cache_file, "r", encoding="utf-8") as f:
@@ -96,11 +98,13 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
 def call_xdg(img_dir: str, size: int = 256):
 
     try:
-        tumbainer = get_thumbnailer()
-        if tumbainer is None:
+        thumbnailer = get_thumbnailer()
+        if thumbnailer is None:
             raise NoThubnailerError
     except NoThubnailerError:
         exit(1)
+
+    print("Generating thumbnails using:", thumbnailer)
 
 
     cache_dir = os.path.expanduser("~/.cache/thumbnails/large/")
@@ -116,17 +120,20 @@ def call_xdg(img_dir: str, size: int = 256):
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
+        #DEBUG
+        print("Out:", out)
+
         # only thumbnail if missing
         if not os.path.exists(out):
-            if tumbainer == "gdk-pixbuf-thumbnailer":
+            if thumbnailer == "gdk-pixbuf-thumbnailer":
                 subprocess.run(
                     ["gdk-pixbuf-thumbnailer", "--size", str(size), img_path, out],
                     check=False,
                 )
 
             #  glycin-thumbnailer -i file://$(pwd)/1.png -o /tmp/new.png -s 256
-            elif tumbainer == "glycin-thumbnailer":
-                subprocess.run( ["glycin-thumbnailer",'-i',"file://"+img_path ,'-o',out, '-s',str(size)], check=False,)
+            elif thumbnailer == "glycin-thumbnailer":
+                subprocess.run( ["glycin-thumbnailer",'-i',"file://"+img_path ,'-o',out, '-s',str(size)])
 
 
 
@@ -142,7 +149,10 @@ def get_thumbnailer():
 
 
 
-
 if __name__ == "__main__":
-    # ligma("/path/to/images")
-    call_xdg("./images/")
+
+    img_dir = "exp/"
+
+    call_xdg(img_dir)
+
+    ligma(img_dir)
