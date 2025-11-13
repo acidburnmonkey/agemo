@@ -489,9 +489,13 @@ class MainWindow(qt.QMainWindow):
 
         print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
 
-        if self.shared_data.data["wallpapers_dir"]:
-            xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
-            xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
+        try:
+            if self.shared_data.data["wallpapers_dir"]:
+                xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
+                xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
+
+        except FileNotFoundError as e:
+                print(e, " >> select a new source dir wallpapers_dir <<")
 
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
