@@ -16,23 +16,8 @@ from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
 from HyprParser import HyprParser
-from __init__ import __version__
+from constants import ROOT_DIR, ASSETS_DIR, GLOBAL_VERSION
 
-# DEF
-GLOBAL_VERSION = __version__
-
-# dev check
-dev_mode = os.path.exists(os.path.dirname(os.path.join(os.path.dirname(__file__), '.git')))
-
-if dev_mode:
-    ROOT_DIR = os.path.dirname(__file__)
-    print("Running DEV")
-else:
-    ROOT_DIR = os.path.join(os.path.expanduser("~"), '.local/share/agemo/')
-    print('ROOT_DIR:', ROOT_DIR)
-
-
-ASSETS_DIR = Path((ROOT_DIR)).parent / "assets"
 
 
 ## Gallery
@@ -306,7 +291,6 @@ class TopBar(qt.QWidget):
         )
 
         # link
-        global GLOBAL_VERSION
         description = qt.QLabel("https://github.com/acidburnmonkey/agemo", dwindow)
         version = qt.QLabel(GLOBAL_VERSION, dwindow)
         version.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -546,6 +530,9 @@ class MainWindow(qt.QMainWindow):
 
 
 def main():
+
+    SharedData.load_settings()
+
     # check for preset DPI
     with open(os.path.join(ROOT_DIR, "agemo.json"), "r") as f:
         data = json.load(f)
