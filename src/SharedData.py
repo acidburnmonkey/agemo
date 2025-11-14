@@ -62,15 +62,3 @@ class SharedData:
 
         except Exception as e:
             print(e)
-
-    # unused check if needed or mk @classmethod
-    def load_xdgcache(self):
-        try:
-            with open(os.path.join(self.script_path, "xdgcache.json"), "r") as f:
-                return json.load(f)
-        except FileNotFoundError:
-            print("Error: Configuration file not found.")
-            return {}
-        except json.JSONDecodeError:
-            print("Error: Malformed JSON in.")
-            return {}
