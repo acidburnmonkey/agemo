@@ -6,6 +6,7 @@
 
 import sys
 import os
+from pathlib import Path
 import json
 import subprocess
 import time
@@ -16,15 +17,21 @@ import xdgthumbails
 from SharedData import SharedData
 from HyprParser import HyprParser
 
-GLOBAL_VERSION = '2.2.0'
+# DEF
+GLOBAL_VERSION = '2.2.2'
 
 # dev check
-dev_mode = os.path.exists(os.path.join(os.path.dirname(__file__), '.git'))
+dev_mode = os.path.exists(os.path.dirname(os.path.join(os.path.dirname(__file__), '.git')))
 
 if dev_mode:
     ROOT_DIR = os.path.dirname(__file__)
+    print("Running DEV")
 else:
     ROOT_DIR = os.path.join(os.path.expanduser("~"), '.local/share/agemo/')
+    print('ROOT_DIR:', ROOT_DIR)
+
+
+ASSETS_DIR = Path((ROOT_DIR)).parent / "assets"
 
 
 ## Gallery
@@ -226,7 +233,7 @@ class TopBar(qt.QWidget):
         self.tlayout.addWidget(self.about)
 
         # exit
-        icon = QIcon(os.path.join(self.shared_data.script_path, "assets/close.svg"))
+        icon = QIcon(str(ASSETS_DIR / "close.svg"))
         self.close_button.setIcon(icon)
         self.close_button.setIconSize(QSize(25, 25))
         self.close_button.setFixedSize(self.close_button.iconSize())
@@ -288,7 +295,7 @@ class TopBar(qt.QWidget):
 
         # image
         project_icon_label = qt.QLabel(dwindow)
-        pixmap = QPixmap(self.shared_data.script_path + "/assets/agemo.png")
+        pixmap = QPixmap(str(ASSETS_DIR / "agemo.png"))
         project_icon_label.setPixmap(pixmap)
         project_icon_label.setFixedSize(50, 50)
         project_icon_label.setScaledContents(True)  # scale image to label size
@@ -386,7 +393,7 @@ class SettingsWindow(qt.QWidget):
         # settings
 
         # exit
-        icon = QIcon(os.path.join(self.shared_data.script_path, "assets/close.svg"))
+        icon = QIcon(str(ASSETS_DIR / "close.svg"))
         self.close_button.setIcon(icon)
         self.close_button.setIconSize(QSize(25, 25))
         self.close_button.setFixedSize(self.close_button.iconSize())
@@ -495,7 +502,7 @@ class MainWindow(qt.QMainWindow):
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
         except FileNotFoundError as e:
-                print(e, " >> select a new source dir wallpapers_dir <<")
+            print(e, " >> select a new source dir wallpapers_dir <<")
 
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)

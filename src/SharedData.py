@@ -15,8 +15,7 @@ class SharedData:
 
     def __init__(self):
         # Dev check
-        dev_mode = os.path.exists(os.path.join(os.path.dirname(__file__), '.git'))
-
+        dev_mode = os.path.exists(os.path.dirname(os.path.join(os.path.dirname(__file__), '.git')))
         if dev_mode:
             self.script_path = os.path.dirname(__file__)
         else:

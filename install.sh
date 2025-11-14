@@ -147,19 +147,19 @@ echo "Installing agemo..."
 
 # Install agemo files
 mkdir -p "$HOME/.local/share/agemo"
-cp -r assets/ agemo.json *.py style.qss pyproject.toml uv.lock "$HOME/.local/share/agemo"
+cp -r assets/ src/ pyproject.toml uv.lock "$HOME/.local/share/agemo"
 
 # Install desktop entry
 mkdir -p "$HOME/.local/share/applications/"
 sed "s|{}|${HOME}|g" agemo.desktop > "$HOME/.local/share/applications/agemo.desktop"
 
 # Make main script executable
-chmod +x "$HOME/.local/share/agemo/agemo.py"
+chmod +x "$HOME/.local/share/agemo/src/agemo.py"
 
 echo ""
 echo "✓ Done! agemo installed to ~/.local/share/agemo"
 echo ""
 echo "To run agemo:"
-echo "  uv run $HOME/.local/share/agemo/agemo.py"
+echo "  uv run $HOME/.local/share/agemo/src/agemo.py"
 echo ""
 echo "Or launch it from your application menu."
