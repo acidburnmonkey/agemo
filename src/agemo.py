@@ -16,9 +16,10 @@ from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
 from HyprParser import HyprParser
+from __init__ import __version__
 
 # DEF
-GLOBAL_VERSION = '2.2.2'
+GLOBAL_VERSION = __version__
 
 # dev check
 dev_mode = os.path.exists(os.path.dirname(os.path.join(os.path.dirname(__file__), '.git')))
