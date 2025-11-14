@@ -1,7 +1,7 @@
 import os
 import subprocess
 import json
-
+from constants import ROOT_DIR
 
 class SharedData:
     """
@@ -14,20 +14,15 @@ class SharedData:
     """
 
     def __init__(self):
-        # Dev check
-        dev_mode = os.path.exists(os.path.join(os.path.dirname(__file__), '.git'))
 
-        if dev_mode:
-            self.script_path = os.path.dirname(__file__)
-        else:
-            self.script_path = os.path.join(os.path.expanduser("~"), '.local/share/agemo/')
-
+        self.script_path = ROOT_DIR
         self.selectedImage = None
         self.data = self.load_settings()
         self.check_monitors()
         # self.thumbnails_data = self.load_xdgcache()
 
-    def load_settings(self):
+    @classmethod
+    def load_settings(cls):
         default_settings = {
             "monitors": [],
             "splash": False,
@@ -37,13 +32,17 @@ class SharedData:
         }
 
         try:
-            with open(os.path.join(self.script_path, "agemo.json"), "r") as f:
+            with open(os.path.join(ROOT_DIR, "agemo.json"), "r") as f:
                 file_data = json.load(f)
                 return {**default_settings, **file_data}
 
         except FileNotFoundError:
-            print("Error: Configuration file not found.")
-            return {}
+            print("Error: Configuration file not found. Creating agemo.json")
+
+            with open(os.path.join(ROOT_DIR, "agemo.json"),'w') as f:
+                json.dump(default_settings, f, indent=4)
+                return default_settings
+
         except json.JSONDecodeError:
             print("Error: Malformed JSON in.")
             return {}
@@ -63,15 +62,3 @@ class SharedData:
 
         except Exception as e:
             print(e)
-
-    # unused check if needed or mk @classmethod
-    def load_xdgcache(self):
-        try:
-            with open(os.path.join(self.script_path, "xdgcache.json"), "r") as f:
-                return json.load(f)
-        except FileNotFoundError:
-            print("Error: Configuration file not found.")
-            return {}
-        except json.JSONDecodeError:
-            print("Error: Malformed JSON in.")
-            return {}

@@ -6,8 +6,8 @@ import hashlib
 from PIL import Image
 import urllib.parse
 from datetime import datetime
+from constants import CACHE_FILE
 
-CACHE_FILE = "xdgcache.json"
 THUMB_ROOT = os.path.expanduser("~/.cache/thumbnails")
 SIZES = ("normal", "large", "x-large", "xx-large")
 
