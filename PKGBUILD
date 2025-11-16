@@ -1,7 +1,7 @@
 
 # Maintainer: acidburnmonkey
 pkgname=agemo
-pkgver=2.2.1
+pkgver=2.3.0
 pkgrel=3
 pkgdesc="Agemo is a GUI for Hyprpaper, written in Python + Qt6"
 arch=('any')
