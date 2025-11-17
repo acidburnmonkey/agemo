@@ -3,6 +3,7 @@ import subprocess
 import json
 from constants import ROOT_DIR
 
+
 class SharedData:
     """
     This class load in memory data that the application uses
@@ -14,7 +15,6 @@ class SharedData:
     """
 
     def __init__(self):
-
         self.script_path = ROOT_DIR
         self.selectedImage = None
         self.data = self.load_settings()
@@ -39,7 +39,7 @@ class SharedData:
         except FileNotFoundError:
             print("Error: Configuration file not found. Creating agemo.json")
 
-            with open(os.path.join(ROOT_DIR, "agemo.json"),'w') as f:
+            with open(os.path.join(ROOT_DIR, "agemo.json"), 'w') as f:
                 json.dump(default_settings, f, indent=4)
                 return default_settings
 

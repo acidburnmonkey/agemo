@@ -19,7 +19,6 @@ from HyprParser import HyprParser
 from constants import ROOT_DIR, ASSETS_DIR, GLOBAL_VERSION
 
 
-
 ## Gallery
 class Gallery(qt.QWidget):
     def __init__(self, shared_data):
@@ -530,7 +529,6 @@ class MainWindow(qt.QMainWindow):
 
 
 def main():
-
     SharedData.load_settings()
 
     # check for preset DPI

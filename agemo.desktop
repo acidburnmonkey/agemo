@@ -4,10 +4,7 @@ Type=Application
 Version=2.3.0
 Name=Agemo
 Comment=Wallpaper GUI
-
-# installer will place $HOME in {}
-Path={}/.local/share/agemo
-Exec=/usr/bin/env uv run --project . src/agemo.py
-Icon={}/.local/share/agemo/assets/agemo.svg
+Exec=agemo
+Icon=agemo
 Terminal=false
 Keywords=wallpaper;hyprpaper

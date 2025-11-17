@@ -84,7 +84,7 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
 
     # if nothing changed return
     if not changed and len(new_entries) == len(existing):
-        print("Cache already up to date.")
+        print("Cache already up to date.")
         return
 
     # write updated cache

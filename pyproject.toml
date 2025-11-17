@@ -8,3 +8,17 @@ dependencies = [
     "pillow>=11.2.1",
     "pyqt6>=6.9.1",
 ]
+
+[project.scripts]
+agemo = "agemo:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatchling.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatchling.build.targets.wheel.shared-data]
+"assets" = "share/agemo/assets"
+"agemo.desktop" = "share/applications/agemo.desktop"
