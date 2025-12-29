@@ -86,7 +86,7 @@ class Gallery(qt.QWidget):
             imageLabel.setGraphicsEffect(shadow)
 
             # 5 columns
-            row, col = divmod(i, 5)
+            row, col = divmod(i, 10)
             imageLabel.setProperty("coordinates", (row, col))
             self.grid_layout.addWidget(imageLabel, row, col)
 

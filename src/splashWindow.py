@@ -11,7 +11,6 @@ class SplashScreen(QDialog):
 
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        layout.setSpacing(0)
 
         self.message = QLabel("Generating thumbnails and Indexing")
         self.message.setAlignment(Qt.AlignmentFlag.AlignCenter)
