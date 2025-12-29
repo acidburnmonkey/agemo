@@ -6,7 +6,6 @@
 
 import sys
 import os
-from pathlib import Path
 import json
 import subprocess
 import time
@@ -18,6 +17,7 @@ from SharedData import SharedData
 from HyprParser import HyprParser
 from constants import ROOT_DIR, ASSETS_DIR, GLOBAL_VERSION
 import helper
+from splashWindow import SplashScreen
 
 
 ## Gallery
@@ -556,18 +556,14 @@ def main():
     with open(script_path, "r") as f:
         qss = f.read()
 
-
     # splash screen
-    splash_pix = QPixmap(window.width(), window.height())
-    splash = qt.QSplashScreen(splash_pix, Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Dialog)
-    splash.showMessage("Indexing cache please wait...", Qt.AlignmentFlag.AlignCenter)
+    splash = SplashScreen()
     splash.setStyleSheet(qss)
 
     splash.show()
     qt.QApplication.processEvents()
 
     indexing_thread = helper.WorkerThread(load_index)
-
 
     def main_window():
         splash.finish(window)  # close splash

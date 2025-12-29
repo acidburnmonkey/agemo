@@ -1,7 +1,9 @@
-from PyQt6.QtCore import  QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
+
 
 class WorkerThread(QThread):
     """Thread to run func() without blocking the GUI"""
+
     finished = pyqtSignal()
 
     def __init__(self, func):
