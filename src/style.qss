@@ -28,6 +28,18 @@ MainWindow {
 }
 
 
+/* splash */
+QSplashScreen {
+    min-height: 600px;
+    min-width: 800px;
+    font-size: 28px;
+}
+
+QSplashScreen>QPixmap {
+    color: #f5e0dc;
+    background-color: black;
+}
+
 /* Grid */
 
 /*  The scroll‑area frame & viewport */
