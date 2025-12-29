@@ -4,6 +4,10 @@ from __init__ import __version__
 
 
 # check if the path is my dev env or normal .local
+def get_root():
+    dev_mode = (Path(__file__).parent.parent / '.git').exists()
+
+# check if the path is my dev env or normal .local
 dev_mode = (Path(__file__).parent.parent / '.git').exists()
 
 
@@ -31,8 +35,6 @@ def get_asset_path():
 
 # returning strings for old os module
 ROOT_DIR = str(get_root())
-
 ASSETS_DIR = str(get_asset_path())
-
 GLOBAL_VERSION = __version__
-CACHE_FILE = str(Path(get_root() / "xdgcache.json"))  # fix this for pipx
+CACHE_FILE = str(Path(get_root() / "xdgcache.json"))

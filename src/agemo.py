@@ -6,7 +6,6 @@
 
 import sys
 import os
-from pathlib import Path
 import json
 import subprocess
 import time
@@ -17,7 +16,8 @@ import xdgthumbails
 from SharedData import SharedData
 from HyprParser import HyprParser
 from constants import ROOT_DIR, ASSETS_DIR, GLOBAL_VERSION
-
+import helper
+from splashWindow import SplashScreen
 
 ## Gallery
 class Gallery(qt.QWidget):
@@ -85,7 +85,7 @@ class Gallery(qt.QWidget):
             imageLabel.setGraphicsEffect(shadow)
 
             # 5 columns
-            row, col = divmod(i, 5)
+            row, col = divmod(i, 10)
             imageLabel.setProperty("coordinates", (row, col))
             self.grid_layout.addWidget(imageLabel, row, col)
 
@@ -480,14 +480,6 @@ class MainWindow(qt.QMainWindow):
 
         print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
 
-        try:
-            if self.shared_data.data["wallpapers_dir"]:
-                xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
-                xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
-
-        except FileNotFoundError as e:
-            print(e, " >> select a new source dir wallpapers_dir <<")
-
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
         self.gallery = Gallery(self.shared_data)
@@ -528,7 +520,28 @@ class MainWindow(qt.QMainWindow):
         layout.insertWidget(1, self.gallery, stretch=1)
 
 
+def load_index():
+    print("Loading index...")
+    shared_data = SharedData()
+
+    try:
+        if shared_data.data["wallpapers_dir"]:
+            xdgthumbails.call_xdg(shared_data.data["wallpapers_dir"])
+            xdgthumbails.ligma(shared_data.data["wallpapers_dir"])
+        print("Loading complete!")
+
+    except FileNotFoundError as e:
+        print(e, " >> select a new source dir wallpapers_dir <<")
+
+
 def main():
+
+    # app init
+    app = qt.QApplication(sys.argv)
+    app.setDesktopFileName("Agemo")
+    window = MainWindow()
+    window.setWindowTitle("Agemo")
+
     SharedData.load_settings()
 
     # check for preset DPI
@@ -539,18 +552,27 @@ def main():
     if data["dpi"]:
         os.environ["QT_SCALE_FACTOR"] = str(data["dpi"])
 
-    app = qt.QApplication(sys.argv)
-    app.setDesktopFileName("Agemo")
-    window = MainWindow()
-    window.setWindowTitle("Agemo")
-
     script_path = os.path.join(ROOT_DIR, "style.qss")
     with open(script_path, "r") as f:
         qss = f.read()
 
-    window.setStyleSheet(qss)
+    # splash screen
+    splash = SplashScreen()
+    splash.setStyleSheet(qss)
 
-    window.show()
+    splash.show()
+    qt.QApplication.processEvents()
+
+    indexing_thread = helper.WorkerThread(load_index)
+
+    def main_window():
+        splash.finish(window)  # close splash
+        window.setStyleSheet(qss)
+        window.show()
+
+    indexing_thread.finished.connect(main_window)
+    indexing_thread.start()
+
     app.exec()
 
 

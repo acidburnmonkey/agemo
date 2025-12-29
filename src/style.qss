@@ -28,8 +28,13 @@ MainWindow {
 }
 
 
-/* Grid */
+/* splash window */
+/* splash message */
+QDialog#splashWindow QLabel {
+    font-size: 18px;
+}
 
+/* Grid */
 /*  The scroll‑area frame & viewport */
 QScrollArea {
     border: none;
