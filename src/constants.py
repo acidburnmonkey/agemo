@@ -16,7 +16,7 @@ def get_root():
 
 
 
-__version__ = "2.4.0"
+__version__ = "2.4.1"
 # returning strings for old os module
 ROOT_DIR =get_root()
 ASSETS_DIR = Path((ROOT_DIR)).parent / "assets"
