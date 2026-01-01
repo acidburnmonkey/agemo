@@ -1,112 +1,197 @@
 import re
-import os
+from pathlib import Path
+from string import Template
+
+from SharedData import SharedData
+
+# class HyprParser:
+
+#     @classmethod
+#     def hypr_write(cls, image_path, target_monitor):
 
 
-class HyprParser:
+class Wallpaper:
+    def __init__(self, monitor="", path="", fit_mode="cover"):
+        self.monitor = monitor
+        self.path = path
+        self.fit_mode = fit_mode
+
+    def __repr__(self):
+        return f"Wallpaper(monitor={self.monitor!r}, path={self.path!r}, fit_mode={self.fit_mode!r})"
+
+
+class HyprpaperConfig:
+    def __init__(self):
+        self.globals = {}  # {"wallpaper1": "/path/to/img", ...}  (no leading $)
+        self.wallpapers = []  # [Wallpaper(...), ...]
+
+    def resolve(self, value):
+        if isinstance(value, str) and value.startswith("$"):
+            return self.globals.get(value[1:], value)
+        return value
+
+
+class HyprpaperParser:
+    GLOBAL_RE = re.compile(r"^\s*\$(\w+)\s+=\s+(.+?)\s*$")
+    BLOCK_START_RE = re.compile(r"^\s*wallpaper\s*\{\s*$")
+    BLOCK_END_RE = re.compile(r"^\s*\}\s*$")
+    KV_RE = re.compile(r"^\s*(\w+)\s+=\s+(.+?)\s*$")
+
     @classmethod
-    def hypr_reader(cls):
-        home = os.getlogin()
-        config_file = os.path.join(home, "/.config/hypr/hyprpaper.conf")
+    def parse(cls, text=None):
+        """
+        Resolve a hyprpaper variable reference into its concrete value.
 
-        with open(config_file, "r") as file:
-            config = file.read()
+        Hyprpaper config can declare globals like:
+            $wallpaper1 = /home/user/pic.jpg
 
-        # Regular expressions to capture relevant patterns
-        splash_pattern = re.compile(r"splash\s*=\s*(\w+)")
-        ipc_pattern = re.compile(r"#?\s*ipc\s*=\s*(\w+)")
-        monitor_pattern = re.compile(r"^wallpaper\s*=\s*([^,]+),", re.MULTILINE)
+        And then reference them inside wallpaper blocks:
+            wallpaper {
+                monitor = DP-1
+                path = $wallpaper1
+                fit_mode = cover
+            }
 
-        # Extract splash status
-        splash_status = splash_pattern.search(config)
-        splash = splash_status.group(1) if splash_status else None
+        Creates wallpaper {} block
+        stored together on a single Wallpaper object:
+            wp.monitor -> "DP-1"
+            wp.path    -> "$wallpaper1"
 
-        # Extract ipc status
-        ipc_status = ipc_pattern.search(config)
-        ipc = ipc_status.group(1) if ipc_status else None
+        This method only resolves the  value if it starts with '$':
+            - If value == "$name" and `self.globals["name"]` exists, return that global value.
+            - Otherwise return the original value unchanged.
 
-        # Extract monitors
-        monitor_stats = monitor_pattern.findall(config)
-        monitors = monitor_stats if monitor_stats else []
+        Args:
+            value: A string that may be a variable reference like "$wallpaper1".
 
-        return splash, ipc, monitors
+        Returns:
+            The resolved string  ("/home/user/pic.jpg") if the variable exists,
+            otherwise the original input string.
+        """
 
-    @classmethod
-    def hypr_write(cls, image_path, target_monitor):
-        home = os.path.expanduser("~")
-        config_file = os.path.join(home, ".config", "hypr", "hyprpaper.conf")
+        cfg = HyprpaperConfig()
+        lines = []
 
-        if not os.path.exists(config_file):
-            with open(config_file, "w") as file:
-                template = """
+        # just for passing raw text for writing
+        if text:
+            lines = text.splitlines()
 
-                preload=
-                preload=
-                wallpaper =
-                wallpaper =
+        with open("./src/test.conf", "r") as f:
+            lines = f.read().splitlines()
 
-                #set the default wallpaper(s) seen on initial workspace(s) --depending on the number of monitors used
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
 
-                #enable splash text rendering over the wallpaper
-                splash = false
+            if not line or line.startswith("#"):
+                i += 1
+                continue
 
-                #fully disable ipc
-                # ipc = off
+            m = cls.GLOBAL_RE.match(lines[i])
+            if m:
+                name = m.group(1)
+                val = m.group(2).strip()
+                cfg.globals[name] = val
+                i += 1
+                continue
 
-                            """
-                file.write(template)
+            if cls.BLOCK_START_RE.match(lines[i]):
+                i += 1
+                data = {}
+                while i < len(lines) and not cls.BLOCK_END_RE.match(lines[i]):
+                    raw = lines[i].strip()
+                    if raw and not raw.startswith("#"):
+                        m2 = cls.KV_RE.match(lines[i])
+                        if m2:
+                            data[m2.group(1)] = m2.group(2).strip()
+                    i += 1
+                if i < len(lines) and cls.BLOCK_END_RE.match(lines[i]):
+                    i += 1
 
-        try:
-            with open(config_file, "r") as file:
-                lines = file.readlines()
+                wp = Wallpaper(
+                    monitor=data.get("monitor", ""),
+                    path=data.get("path", ""),
+                    fit_mode=data.get("fit_mode", "cover"),
+                )
+                cfg.wallpapers.append(wp)
+                continue
 
-            preload_pattern = re.compile(r"^preload\s*=\s*(.+)$")
-            wallpaper_pattern = re.compile(r"^wallpaper\s*=\s*([^,]+),(.*)$")
+            i += 1
 
-            preloads = set()
-            wallpapers = {}
-            other_lines = []
+        return cfg
 
-            for line in lines:
-                if preload_match := preload_pattern.match(line):
-                    preload_path = preload_match.group(1).strip()
-                    preloads.add(preload_path)
-                elif wallpaper_match := wallpaper_pattern.match(line):
-                    monitor = wallpaper_match.group(1).strip()
-                    wallpaper_path = wallpaper_match.group(2).strip()
-                    wallpapers[monitor] = wallpaper_path
-                else:
-                    other_lines.append(line.strip())
 
-            wallpapers[target_monitor] = image_path
+class HyprpaperWrite(SharedData):
 
-            # Synchronize preload with wallpapers
-            preloads = {path for path in preloads if path in wallpapers.values()}
-            preloads.add(image_path)
 
-            # Write the updated configuration back to the file
-            with open(config_file, "w") as file:
-                # Write updated preload entries
-                for preload_path in sorted(preloads):
-                    file.write(f"preload= {preload_path}\n")
+    def __init__(self) :
+        super().__init__()
 
-                # Write updated wallpaper entries
-                for monitor, wallpaper_path in wallpapers.items():
-                    file.write(f"wallpaper = {monitor},{wallpaper_path}\n")
+        self.config_path = Path("./src/test.conf")
 
-                # Write other configuration lines
-                for line in other_lines:
-                    file.write(f"{line}\n")
+        self.template = Template("""
 
-            return True
+wallpaper {
+    monitor = $var
+    path =
+    fit_mode = cover
+}\n """)
 
-        except FileNotFoundError:
-            print("⛔ hyprpaper.conf file not found")
+        # monitors: ['DP-1', 'DP-2']
+        self.fistRun()
 
-            return False
-        except Exception as e:
-            print(e)
-            return False
+
+
+    #writes file if not exist on initial run
+    def fistRun(self):
+        if not self.config_path.exists():
+            with open(self.config_path, "w+") as f:
+                for  m in self.monitors:
+                    txt = self.template.substitute(var=m)
+                    f.write(txt)
+
+
+    def hypr_write(self, image_path, target_monitor):
+        parser = HyprpaperParser.parse()
+
+
+
+# reader does not open the file
+def test_reader():
+    print("Testing reader")
+    print("reading from :", Path.cwd())
+
+    reader_sample = r"""
+$wallpaper1 = /home/mahalo/photos/wallhaven-e8x3yo.jpg
+$wallpaper2 = /home/mahalo/photos/wallhaven-8ggqqj.jpg
+
+wallpaper {
+    monitor = DP-1
+    path = $wallpaper1
+    fit_mode = cover
+}
+
+wallpaper {
+    monitor = DP-2
+    path = $wallpaper2
+    fit_mode = cover
+}
+"""
+
+    # cfg = HyprpaperParser.parse(reader_sample)
+    cfg = HyprpaperParser.parse()
+
+    # globals.get(var1)
+    # # wallpaper.monitor / wallpaper.path
+
+    for wp in cfg.wallpapers:
+        print(wp.monitor, wp.path, "->", cfg.resolve(wp.path))
 
 
 if __name__ == "__main__":
-    HyprParser.hypr_write("2121212", "cassssssss")
+    # test_reader()
+
+    writer = HyprpaperWrite()
+    print(writer.fistRun())
+
+    # writer.hypr_write('','')

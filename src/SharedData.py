@@ -19,7 +19,7 @@ class SharedData:
         self.selectedImage = None
         self.data = self.load_settings()
         self.check_monitors()
-        # self.thumbnails_data = self.load_xdgcache()
+        self.monitors = self.data['monitors']
 
     @classmethod
     def load_settings(cls):
