@@ -1,13 +1,19 @@
 import re
 from pathlib import Path
 from string import Template
-
 from SharedData import SharedData
 
-# class HyprParser:
 
-#     @classmethod
-#     def hypr_write(cls, image_path, target_monitor):
+CONFIG_PATH = "test.conf"
+
+
+TEMPLATE = Template("""
+
+wallpaper {
+    monitor = $monitor
+    path = $path
+    fit_mode = $fit
+}\n """)
 
 
 class Wallpaper:
@@ -16,14 +22,41 @@ class Wallpaper:
         self.path = path
         self.fit_mode = fit_mode
 
+    def to_conf(self):
+        return TEMPLATE.substitute(
+            monitor=self.monitor,
+            path=self.path,
+            fit=self.fit_mode or "cover",
+        )
+
     def __repr__(self):
         return f"Wallpaper(monitor={self.monitor!r}, path={self.path!r}, fit_mode={self.fit_mode!r})"
 
+    def __str__(self):
+        return self.to_conf()
+
 
 class HyprpaperConfig:
+    """
+    Container for a parsed hyprpaper.conf.
+
+    Holds:
+      - self.globals: dict of `$var = value` assignments (no leading '$' in keys)
+      - self.wallpapers: list of Wallpaper objects
+
+    Each Wallpaper represents one `wallpaper { ... }` block and exposes attributes
+    like `monitor`, `path`, and `fit_mode`, plus methods like `to_conf()` for
+    serializing back to config text.
+
+    Example:
+        cfg.wallpapers[0].monitor
+        cfg.wallpapers[0].to_conf()
+        cfg.globals.get("wallpaper1")
+    """
+
     def __init__(self):
-        self.globals = {}  # {"wallpaper1": "/path/to/img", ...}  (no leading $)
-        self.wallpapers = []  # [Wallpaper(...), ...]
+        self.globals = {}
+        self.wallpapers = []
 
     def resolve(self, value):
         if isinstance(value, str) and value.startswith("$"):
@@ -38,45 +71,11 @@ class HyprpaperParser:
     KV_RE = re.compile(r"^\s*(\w+)\s+=\s+(.+?)\s*$")
 
     @classmethod
-    def parse(cls, text=None):
-        """
-        Resolve a hyprpaper variable reference into its concrete value.
-
-        Hyprpaper config can declare globals like:
-            $wallpaper1 = /home/user/pic.jpg
-
-        And then reference them inside wallpaper blocks:
-            wallpaper {
-                monitor = DP-1
-                path = $wallpaper1
-                fit_mode = cover
-            }
-
-        Creates wallpaper {} block
-        stored together on a single Wallpaper object:
-            wp.monitor -> "DP-1"
-            wp.path    -> "$wallpaper1"
-
-        This method only resolves the  value if it starts with '$':
-            - If value == "$name" and `self.globals["name"]` exists, return that global value.
-            - Otherwise return the original value unchanged.
-
-        Args:
-            value: A string that may be a variable reference like "$wallpaper1".
-
-        Returns:
-            The resolved string  ("/home/user/pic.jpg") if the variable exists,
-            otherwise the original input string.
-        """
-
+    def parse(cls):
         cfg = HyprpaperConfig()
         lines = []
 
-        # just for passing raw text for writing
-        if text:
-            lines = text.splitlines()
-
-        with open("./src/test.conf", "r") as f:
+        with open(CONFIG_PATH, "r") as f:
             lines = f.read().splitlines()
 
         i = 0
@@ -108,12 +107,12 @@ class HyprpaperParser:
                 if i < len(lines) and cls.BLOCK_END_RE.match(lines[i]):
                     i += 1
 
-                wp = Wallpaper(
+                conf_block = Wallpaper(
                     monitor=data.get("monitor", ""),
                     path=data.get("path", ""),
                     fit_mode=data.get("fit_mode", "cover"),
                 )
-                cfg.wallpapers.append(wp)
+                cfg.wallpapers.append(conf_block)
                 continue
 
             i += 1
@@ -122,63 +121,54 @@ class HyprpaperParser:
 
 
 class HyprpaperWrite(SharedData):
-
-
-    def __init__(self) :
+    def __init__(self):
         super().__init__()
-
-        self.config_path = Path("./src/test.conf")
-
-        self.template = Template("""
-
-wallpaper {
-    monitor = $var
-    path =
-    fit_mode = cover
-}\n """)
-
-        # monitors: ['DP-1', 'DP-2']
+        self.config_path = Path(CONFIG_PATH)
         self.fistRun()
 
-
-
-    #writes file if not exist on initial run
+    # writes file if not exist on initial run
     def fistRun(self):
         if not self.config_path.exists():
-            with open(self.config_path, "w+") as f:
-                for  m in self.monitors:
-                    txt = self.template.substitute(var=m)
-                    f.write(txt)
+            with open(self.config_path, "x") as f:
+                for m in self.monitors:
+                    try:
+                        txt = TEMPLATE.substitute(monitor=m, path="", fit="cover")
+                    except ValueError as e:
+                        print(e.with_traceback)
+                        return
 
+                    f.write(txt)
 
     def hypr_write(self, image_path, target_monitor):
         parser = HyprpaperParser.parse()
+        is_new = False
+
+        for i, block in enumerate(parser.wallpapers):
+            if block.monitor == target_monitor:
+                parser.wallpapers[i].path = image_path
+                is_new = True
+                break
 
 
+        out = "\n".join(block.to_conf() for block in parser.wallpapers)
+        with open(CONFIG_PATH, "w") as f:
+            f.write(out)
 
-# reader does not open the file
+        # append to the top if monitor not in config
+        if is_new:
+            new_block = Wallpaper(image_path, target_monitor)
+
+            with open(CONFIG_PATH, "r") as f:
+                old = f.read()
+
+            with open(CONFIG_PATH, "w") as f:
+                f.write(new_block.to_conf() + "\n" + old)
+
+
 def test_reader():
     print("Testing reader")
     print("reading from :", Path.cwd())
 
-    reader_sample = r"""
-$wallpaper1 = /home/mahalo/photos/wallhaven-e8x3yo.jpg
-$wallpaper2 = /home/mahalo/photos/wallhaven-8ggqqj.jpg
-
-wallpaper {
-    monitor = DP-1
-    path = $wallpaper1
-    fit_mode = cover
-}
-
-wallpaper {
-    monitor = DP-2
-    path = $wallpaper2
-    fit_mode = cover
-}
-"""
-
-    # cfg = HyprpaperParser.parse(reader_sample)
     cfg = HyprpaperParser.parse()
 
     # globals.get(var1)
@@ -190,8 +180,5 @@ wallpaper {
 
 if __name__ == "__main__":
     # test_reader()
-
     writer = HyprpaperWrite()
-    print(writer.fistRun())
-
-    # writer.hypr_write('','')
+    writer.hypr_write("xxddd/xdhehe", "DP-1")
