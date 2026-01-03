@@ -2,23 +2,21 @@
 
 - Support for high DPI displays
 - wayland native
+- Built on Qt6
 
 ![](images/1.png)
 ![](images/2.png)
 
 ## Requirements
 
-- Hyprpaper
-- Hyprland
+- Hyprpaper >= 0.8.0
+- Hyprland >= 0.53.0
 - UV
 - gdk-pixbuf-thumbnailer or glycin-thumbnailer
 
-## 🚀 - V2 is a complete rewrite 1000% more efficient
+## ☕ Hyprpaper v0.8 ready
 
-- Now using pyQt6 over tkinter , Qt is multi threaded and compiled from c++ , in contrast tkinter is single threaded and all bindings libraries
-  are in python.New engine can handle thousands of images at the same time without freezing.
-- No longer generating extra thumbnails , instead it fetches them from $XDG avoids making writes to the drive.
-- Using uv over pip.
+Hyprpaper 0.8.0 introduced breaking changes use an older version from releases if you can't update
 
 ## Install
 
@@ -39,6 +37,7 @@ clone the repo and run the script don’t need sudo
 
 - sorting images by name
 - recursive indexing of directories
+- auto updater
 
 <br>
 <br>
