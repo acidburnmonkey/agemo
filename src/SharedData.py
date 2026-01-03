@@ -19,7 +19,7 @@ class SharedData:
         self.selectedImage = None
         self.data = self.load_settings()
         self.check_monitors()
-        self.monitors = self.data['monitors']
+        self.monitors = self.data["monitors"]
 
     @classmethod
     def load_settings(cls):
@@ -39,7 +39,7 @@ class SharedData:
         except FileNotFoundError:
             print("Error: Configuration file not found. Creating agemo.json")
 
-            with open(os.path.join(ROOT_DIR, "agemo.json"), 'w') as f:
+            with open(os.path.join(ROOT_DIR, "agemo.json"), "w") as f:
                 json.dump(default_settings, f, indent=4)
                 return default_settings
 
@@ -49,7 +49,9 @@ class SharedData:
 
     def check_monitors(self):
         try:
-            hypr_ctl = subprocess.run(["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True)
+            hypr_ctl = subprocess.run(
+                ["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True
+            )
             hold = json.loads(hypr_ctl.stdout)
 
             # returns list of monitor names

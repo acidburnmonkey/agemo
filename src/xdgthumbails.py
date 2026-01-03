@@ -28,7 +28,7 @@ def is_image(path: str) -> bool:
 
 def calculate_md5(path: str) -> str:
     abs_path = os.path.abspath(path)
-    uri = "file://" + urllib.parse.quote(abs_path, safe='/')
+    uri = "file://" + urllib.parse.quote(abs_path, safe="/")
     return hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
 
 
@@ -75,7 +75,9 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
             # new or modified
             thumb_name = calculate_md5(full)
             thumb_path = find_thumbnail(thumb_name)
-            new_entries.append({"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn})
+            new_entries.append(
+                {"image": full, "thumbnail": thumb_path, "date": mod_date, "name": fn}
+            )
             changed = True
 
     # new_entries.sort(key=lambda e: e["name"].lower())
@@ -113,7 +115,7 @@ def call_xdg(img_dir: str, size: int = 256):
 
         img_path = os.path.abspath(os.path.join(img_dir, fn))
 
-        uri = "file://" + urllib.parse.quote(img_path, safe='/')
+        uri = "file://" + urllib.parse.quote(img_path, safe="/")
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
@@ -130,15 +132,25 @@ def call_xdg(img_dir: str, size: int = 256):
 
             #  glycin-thumbnailer -i file://$(pwd)/1.png -o /tmp/new.png -s 256
             elif thumbnailer == "glycin-thumbnailer":
-                subprocess.run(["glycin-thumbnailer", '-i', "file://" + img_path, '-o', out, '-s', str(size)])
+                subprocess.run(
+                    [
+                        "glycin-thumbnailer",
+                        "-i",
+                        "file://" + img_path,
+                        "-o",
+                        out,
+                        "-s",
+                        str(size),
+                    ]
+                )
 
 
 def get_thumbnailer():
-    if shutil.which('gdk-pixbuf-thumbnailer'):
-        return 'gdk-pixbuf-thumbnailer'
+    if shutil.which("gdk-pixbuf-thumbnailer"):
+        return "gdk-pixbuf-thumbnailer"
 
-    elif shutil.which('glycin-thumbnailer'):
-        return 'glycin-thumbnailer'
+    elif shutil.which("glycin-thumbnailer"):
+        return "glycin-thumbnailer"
 
     else:
         return False

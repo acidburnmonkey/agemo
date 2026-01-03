@@ -1,13 +1,10 @@
 import re
 from pathlib import Path
 from string import Template
+
 from SharedData import SharedData
 
-
-
-CONFIG_PATH = Path("~/test.conf").expanduser()
-
-
+CONFIG_PATH = Path("~/.config/hypr/hyprpaper.conf").expanduser()
 
 TEMPLATE = Template("""
 wallpaper {
@@ -113,7 +110,7 @@ class HyprpaperParser:
                 cfg.wallpapers.append(conf_block)
                 continue
 
-            #settings splash
+            # settings splash
             m3 = cls.KV_RE.match(lines[i])
             if m3:
                 cfg.settings[m3.group(1)] = m3.group(2).strip()
@@ -129,7 +126,12 @@ class HyprpaperWrite(SharedData):
     def __init__(self):
         super().__init__()
         self.config_path = Path(CONFIG_PATH)
-        self.firstRun()
+
+        try:
+            self.firstRun()
+        except FileNotFoundError:
+            Path.mkdir(CONFIG_PATH.parent, parents=True)
+            self.firstRun()
 
     # writes file if not exist on initial run
     def firstRun(self):
@@ -144,26 +146,24 @@ class HyprpaperWrite(SharedData):
                         return
 
                     f.write(txt)
-                    f.write('\nsplash = true')
-
+                    f.write("\nsplash = true")
 
     def hypr_write(self, image_path, target_monitor):
         parser = HyprpaperParser.parse()
         create_new = True
 
-        #splash serializer
-        splash = parser.settings.get('splash')
-        if splash == 'true' or splash is None:
-            splash = '\nsplash = true'
+        # splash serializer
+        splash = parser.settings.get("splash")
+        if splash == "true" or splash is None:
+            splash = "\nsplash = true"
         else:
-            splash = '\nsplash = false'
+            splash = "\nsplash = false"
 
         for i, block in enumerate(parser.wallpapers):
             if block.monitor == target_monitor:
                 parser.wallpapers[i].path = image_path
                 create_new = False
                 break
-
 
         out = "\n".join(block.to_conf() for block in parser.wallpapers)
         with open(CONFIG_PATH, "w") as f:
@@ -183,7 +183,6 @@ class HyprpaperWrite(SharedData):
             f.write(splash)
 
 
-
 def test_reader():
     print("Testing reader")
     print("reading from :", Path.cwd())
@@ -192,7 +191,7 @@ def test_reader():
 
     # globals.get(var1)
     # # wallpaper.monitor / wallpaper.path
-    print("Splash: ",cfg.settings.get("splash"))
+    print("Splash: ", cfg.settings.get("splash"))
 
     for wp in cfg.wallpapers:
         print(wp.monitor, wp.path, "->", cfg.resolve(wp.path))
@@ -202,4 +201,3 @@ if __name__ == "__main__":
     # test_reader()
     writer = HyprpaperWrite()
     writer.hypr_write("xxddd/xdhehe", "DP-2")
-

@@ -15,10 +15,11 @@ from PyQt6.QtCore import Qt, QSize, QProcess, QProcessEnvironment, pyqtSignal
 from PyQt6.QtGui import QIcon, QPixmap, QColor
 import xdgthumbails
 from SharedData import SharedData
-from HyprParser import HyprParser
+from HyprParser import HyprpaperWrite
 from constants import ROOT_DIR, ASSETS_DIR, GLOBAL_VERSION
 import helper
 from splashWindow import SplashScreen
+
 
 ## Gallery
 class Gallery(qt.QWidget):
@@ -64,7 +65,7 @@ class Gallery(qt.QWidget):
         except FileNotFoundError:
             thumbnails = []
             with open(os.path.join(ROOT_DIR, "xdgcache.json"), "w") as f:
-                f.write('[]')
+                f.write("[]")
 
         for i, item in enumerate(thumbnails):
             # print(i,item['thumbnail'])
@@ -155,7 +156,9 @@ class BottomBar(qt.QWidget):
         self.b_layout.setAlignment(Qt.AlignmentFlag.AlignBottom)
         self.b_layout.setSpacing(4)
 
-        self.bframe.setStyleSheet("QFrame{border:1px solid #cad3f5; border-radius: 10px;}")
+        self.bframe.setStyleSheet(
+            "QFrame{border:1px solid #cad3f5; border-radius: 10px;}"
+        )
 
         self.applyButton.setFixedSize(80, 20)  # W , H
         self.monitors_select.setFixedSize(100, 20)  # W , H
@@ -166,17 +169,19 @@ class BottomBar(qt.QWidget):
         print("selected > self.current_monitor:", self.current_monitor)
 
     def apply(self):
+        writer = HyprpaperWrite()
+
         if self.shared_data.selectedImage:
             print("applying to :", self.current_monitor)
             print("Image selected : ", self.shared_data.selectedImage)
 
             try:
-                HyprParser.hypr_write(self.shared_data.selectedImage, self.current_monitor)
+                writer.hypr_write(self.shared_data.selectedImage, self.current_monitor)
                 subprocess.call(["kill", "hyprpaper"])
                 time.sleep(1)
                 subprocess.Popen(["hyprpaper"])
             except FileNotFoundError:
-                print('⛔ Hyprpaper is not installed')
+                print("⛔ Hyprpaper is not installed")
 
 
 # Top bar
@@ -250,7 +255,9 @@ class TopBar(qt.QWidget):
             self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # emit signal to gallery
@@ -394,7 +401,9 @@ class SettingsWindow(qt.QWidget):
         self.settingsLayout.addWidget(self.label, 0, 0)
         self.settingsLayout.addWidget(self.checkBox, 1, 0, 1, 1)
         self.settingsLayout.addWidget(self.dpiLabel, 1, 1, 1, 1)
-        self.settingsLayout.addWidget(self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.settingsLayout.addWidget(
+            self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
         self.settingsLayout.addWidget(
             self.buttonScale,
             3,
@@ -424,7 +433,9 @@ class SettingsWindow(qt.QWidget):
     def scaleNow(self):
         if self.shared_data.data["dpi"] and self.checkBox.isChecked():
             # write to config file
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # build a QProcessEnvironment
@@ -449,7 +460,9 @@ class SettingsWindow(qt.QWidget):
 
         elif not self.checkBox.isChecked():
             self.shared_data.data["dpi"] = None
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
     def slide(self, i):
@@ -479,7 +492,9 @@ class MainWindow(qt.QMainWindow):
         # shared data
         self.shared_data = SharedData()
 
-        print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
+        print(
+            "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
+        )
 
         self.bottom_bar = BottomBar(self.shared_data, self)
         self.top_bar = TopBar(self.shared_data, self)
@@ -536,7 +551,6 @@ def load_index():
 
 
 def main():
-
     # app init
     app = qt.QApplication(sys.argv)
     app.setDesktopFileName("Agemo")
