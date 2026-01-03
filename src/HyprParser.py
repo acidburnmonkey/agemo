@@ -4,11 +4,12 @@ from string import Template
 from SharedData import SharedData
 
 
-CONFIG_PATH = "test.conf"
+
+CONFIG_PATH = Path("~/test.conf").expanduser()
+
 
 
 TEMPLATE = Template("""
-
 wallpaper {
     monitor = $monitor
     path = $path
@@ -41,12 +42,8 @@ class HyprpaperConfig:
     Container for a parsed hyprpaper.conf.
 
     Holds:
-      - self.globals: dict of `$var = value` assignments (no leading '$' in keys)
-      - self.wallpapers: list of Wallpaper objects
-
-    Each Wallpaper represents one `wallpaper { ... }` block and exposes attributes
-    like `monitor`, `path`, and `fit_mode`, plus methods like `to_conf()` for
-    serializing back to config text.
+      - self.globals: dict of `$var = value` assignments no leading '$' in keys
+      - self.wallpapers: list of Wallpaper ( objects )
 
     Example:
         cfg.wallpapers[0].monitor
@@ -57,6 +54,7 @@ class HyprpaperConfig:
     def __init__(self):
         self.globals = {}
         self.wallpapers = []
+        self.settings = {}
 
     def resolve(self, value):
         if isinstance(value, str) and value.startswith("$"):
@@ -115,6 +113,13 @@ class HyprpaperParser:
                 cfg.wallpapers.append(conf_block)
                 continue
 
+            #settings splash
+            m3 = cls.KV_RE.match(lines[i])
+            if m3:
+                cfg.settings[m3.group(1)] = m3.group(2).strip()
+                i += 1
+                continue
+
             i += 1
 
         return cfg
@@ -124,11 +129,12 @@ class HyprpaperWrite(SharedData):
     def __init__(self):
         super().__init__()
         self.config_path = Path(CONFIG_PATH)
-        self.fistRun()
+        self.firstRun()
 
     # writes file if not exist on initial run
-    def fistRun(self):
+    def firstRun(self):
         if not self.config_path.exists():
+            self.monitors.sort()
             with open(self.config_path, "x") as f:
                 for m in self.monitors:
                     try:
@@ -138,15 +144,24 @@ class HyprpaperWrite(SharedData):
                         return
 
                     f.write(txt)
+                    f.write('\nsplash = true')
+
 
     def hypr_write(self, image_path, target_monitor):
         parser = HyprpaperParser.parse()
-        is_new = False
+        create_new = True
+
+        #splash serializer
+        splash = parser.settings.get('splash')
+        if splash == 'true' or splash is None:
+            splash = '\nsplash = true'
+        else:
+            splash = '\nsplash = false'
 
         for i, block in enumerate(parser.wallpapers):
             if block.monitor == target_monitor:
                 parser.wallpapers[i].path = image_path
-                is_new = True
+                create_new = False
                 break
 
 
@@ -155,7 +170,7 @@ class HyprpaperWrite(SharedData):
             f.write(out)
 
         # append to the top if monitor not in config
-        if is_new:
+        if create_new:
             new_block = Wallpaper(image_path, target_monitor)
 
             with open(CONFIG_PATH, "r") as f:
@@ -163,6 +178,10 @@ class HyprpaperWrite(SharedData):
 
             with open(CONFIG_PATH, "w") as f:
                 f.write(new_block.to_conf() + "\n" + old)
+
+        with open(CONFIG_PATH, "a") as f:
+            f.write(splash)
+
 
 
 def test_reader():
@@ -173,6 +192,7 @@ def test_reader():
 
     # globals.get(var1)
     # # wallpaper.monitor / wallpaper.path
+    print("Splash: ",cfg.settings.get("splash"))
 
     for wp in cfg.wallpapers:
         print(wp.monitor, wp.path, "->", cfg.resolve(wp.path))
@@ -181,4 +201,5 @@ def test_reader():
 if __name__ == "__main__":
     # test_reader()
     writer = HyprpaperWrite()
-    writer.hypr_write("xxddd/xdhehe", "DP-1")
+    writer.hypr_write("xxddd/xdhehe", "DP-2")
+

@@ -1,5 +1,4 @@
 from pathlib import Path
-import sys
 
 
 # check if the path is my dev env or normal .local
@@ -8,12 +7,14 @@ dev_mode = (Path(__file__).parent.parent / '.git').exists()
 
 def get_root():
     if dev_mode:
-        print("Running DEV")
         return Path(__file__).parent
     else:
         root_dir = Path.home() / '.local/share/agemo/src/'
         return root_dir
 
+
+if dev_mode:
+    print("Running DEV")
 
 
 __version__ = "2.4.1"
