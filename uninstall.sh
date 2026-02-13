@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm -rf  "$HOME/.local/share/agemo"
+rm -rf  "$HOME/.local/share/applications/agemo.desktop"
 
-rm -rf -v  "$HOME/.local/share/agemo"
-rm -rf -v  "$HOME/.local/share/applications/agemo.desktop"
+$echo "uninstalled agemo"
