@@ -17,7 +17,7 @@ if dev_mode:
     print("Running DEV")
 
 
-__version__ = '2.5.0'
+__version__ = '2.6.0'
 # returning strings for old os module
 ROOT_DIR = get_root()
 ASSETS_DIR = Path((ROOT_DIR)).parent / "assets"
