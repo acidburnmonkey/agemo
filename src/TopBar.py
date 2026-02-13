@@ -6,9 +6,10 @@
 import json
 import os
 import sys
+import requests
 
 import PyQt6.QtWidgets as qt
-from PyQt6.QtCore import QSize, Qt, pyqtSignal
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, QThread
 from PyQt6.QtGui import QIcon, QPixmap
 
 import xdgthumbails
@@ -16,15 +17,40 @@ from constants import ASSETS_DIR, GLOBAL_VERSION
 from settings import SettingsWindow
 
 
+# returns string as tuple
+def version_to_tuple(version):
+    return tuple(map(int, version.strip("v").split(".")))
+
+
+class UpdateChecker(QThread):
+    finished = pyqtSignal(str)
+
+    def run(self):
+        try:
+            res = requests.get(
+                "https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5
+            )
+            if res.ok:
+                data = res.json()[0].get("name")
+                self.finished.emit(data)
+            else:
+                self.finished.emit("N/A")
+        except Exception as e:
+            print(f"Exception in thread: {e}")
+            self.finished.emit("Error")
+
+
 # Top bar
 class TopBar(qt.QWidget):
     # emit signal on dir change
     directoryChanged = pyqtSignal(str)
+    checkOnline = pyqtSignal(str)
 
     def __init__(self, shared_data=None, parent=None):
         super().__init__(parent)
 
         self.shared_data = shared_data
+        self.upstream_version = None
 
         # Buttons
         self.close_button = qt.QPushButton()
@@ -114,12 +140,13 @@ class TopBar(qt.QWidget):
 
     # About window : dwindow
     def show_about(self):
-        dwindow = qt.QDialog(self)
-        dwindow.setWindowTitle("About")
-        abox = qt.QVBoxLayout(dwindow)
+        self.check_updates()
+        self.dwindow = qt.QDialog(self)
+        self.dwindow.setWindowTitle("About")
+        abox = qt.QVBoxLayout(self.dwindow)
 
         # image
-        project_icon_label = qt.QLabel(dwindow)
+        project_icon_label = qt.QLabel(self.dwindow)
         pixmap = QPixmap(str(ASSETS_DIR / "agemo.png"))
         project_icon_label.setPixmap(pixmap)
         project_icon_label.setFixedSize(50, 50)
@@ -130,22 +157,41 @@ class TopBar(qt.QWidget):
         )
 
         # link
-        description = qt.QLabel("https://github.com/acidburnmonkey/agemo", dwindow)
-        version = qt.QLabel(GLOBAL_VERSION, dwindow)
-        version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        description = qt.QLabel("https://github.com/acidburnmonkey/agemo", self.dwindow)
+        self.version_label = qt.QLabel(GLOBAL_VERSION, self.dwindow)
+        self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         abox.addWidget(description)
-        abox.addWidget(version)
+        abox.addWidget(self.version_label)
 
         # ok
-        dismiss_button = qt.QPushButton("OK", dwindow)
-        dismiss_button.clicked.connect(dwindow.close)
+        dismiss_button = qt.QPushButton("OK", self.dwindow)
+        dismiss_button.clicked.connect(self.dwindow.close)
         dismiss_button.setFixedSize(50, 20)
         abox.addWidget(dismiss_button, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        dwindow.setLayout(abox)
-        dwindow.adjustSize()  # calculate size
-        dwindow.setFixedSize(dwindow.size())  # set fixed
-        dwindow.exec()
+        self.dwindow.setLayout(abox)
+        self.dwindow.adjustSize()  # calculate size
+        self.dwindow.setMinimumSize(self.dwindow.size())
+        self.dwindow.exec()
 
     def exit(self):
         sys.exit()
+
+    def check_updates(self):
+        self.update_worker = UpdateChecker()
+        self.update_worker.finished.connect(self.update_version_display)
+        self.update_worker.start()
+        print("Checking for Updates")
+
+    def update_version_display(self, version):
+        self.upstream_version = version
+        print("self.upstream_version: ", self.upstream_version)
+
+        if version_to_tuple(self.upstream_version) > version_to_tuple(GLOBAL_VERSION):
+            self.version_label.setStyleSheet("color: green;")
+            self.version_label.setText(
+                f"There is a new version!: {self.upstream_version} \n Current: {GLOBAL_VERSION} "
+            )
+            self.dwindow.adjustSize()
+
+        self.dwindow.setFixedSize(self.dwindow.size())  # set fix size at the end

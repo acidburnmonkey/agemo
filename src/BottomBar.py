@@ -3,7 +3,6 @@
 #  https://github.com/acidburnmonkey
 
 
-
 import subprocess
 import time
 
@@ -75,4 +74,3 @@ class BottomBar(qt.QWidget):
                 subprocess.Popen(["hyprpaper"])
             except FileNotFoundError:
                 print("⛔ Hyprpaper is not installed")
-

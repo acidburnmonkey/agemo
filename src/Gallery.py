@@ -109,4 +109,3 @@ class ClickableLabel(qt.QLabel):
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit()
         super().mouseReleaseEvent(event)
-

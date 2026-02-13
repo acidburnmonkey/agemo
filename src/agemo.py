@@ -18,6 +18,7 @@ from splashWindow import SplashScreen
 from TopBar import TopBar
 from Gallery import Gallery
 
+
 # Main Window
 class MainWindow(qt.QMainWindow):
     def __init__(self):

@@ -174,4 +174,3 @@ class SettingsWindow(qt.QWidget):
         else:
             self.dpiLabel.setText("Disable UI Scaling")
             self.slider.setEnabled(True)
-
