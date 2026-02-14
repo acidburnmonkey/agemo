@@ -1,8 +1,10 @@
 # Agemo is a Gui front end for Hyprpaper
 
 - Support for high DPI displays
-- wayland native
+- Wayland native
 - Built on Qt6
+- Loads thousands of images without freezing
+- Clean integration with Hyprpaper , no extra daemon needed
 
 ![](images/1.png)
 ![](images/2.png)
