@@ -55,14 +55,11 @@ class SettingsWindow(qt.QWidget):
 
         self.initUI()
 
-        try:
-            self.scaleFactor = os.environ["QT_SCALE_FACTOR"]
-            if self.scaleFactor:
-                self.label.setText(f"""You already have scaling set on environment :
-                                   $QT_SCALE_FACTOR: {self.scaleFactor}
-                                   """)
-        except Exception as e:
-            print("err at self.scaleFactor", e)
+        self.scaleFactor = os.environ.get("QT_SCALE_FACTOR")
+        if self.scaleFactor:
+            self.label.setText(f"""You already have scaling set on environment :
+                               $QT_SCALE_FACTOR: {self.scaleFactor}
+                               """)
 
     # UI
     def initUI(self):
