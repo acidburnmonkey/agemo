@@ -11,8 +11,10 @@ import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPixmap, QResizeEvent
 
-from constants import ROOT_DIR
+from constants import ROOT_DIR, get_logger
 from SharedData import SharedData
+
+logg = get_logger(__name__)
 
 
 ## Gallery
@@ -106,8 +108,8 @@ class Gallery(qt.QWidget):
         # remember
         self.selected_label = lbl
         self.shared_data.selectedImage = lbl.property("image")
-        print("label:", lbl.property("image"))
-        # print("coordinates :", lbl.property("coordinates"))
+        logg.info(f"label: {lbl.property('image')}")
+        logg.debug(f"coordinates : {lbl.property('coordinates')}")
 
 
 # subclass for Gallery

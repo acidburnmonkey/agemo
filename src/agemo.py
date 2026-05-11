@@ -9,16 +9,17 @@ import os
 import sys
 
 import PyQt6.QtWidgets as qt
-from PyQt6.QtGui import QResizeEvent
 
 import helper
 import xdgthumbails
 from BottomBar import BottomBar
-from constants import ROOT_DIR
+from constants import ROOT_DIR, get_logger
 from Gallery import Gallery
 from SharedData import SharedData
 from splashWindow import SplashScreen
 from TopBar import TopBar
+
+logg = get_logger(__name__)
 
 
 # Main Window
@@ -29,7 +30,9 @@ class MainWindow(qt.QMainWindow):
         # shared data
         self.shared_data: SharedData = SharedData()
 
-        print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
+        logg.info(
+            f"shared_data['wallpapers_dir'] : {self.shared_data.data['wallpapers_dir']}"
+        )
 
         self.bottom_bar: BottomBar = BottomBar(self.shared_data, self)
         self.top_bar: TopBar = TopBar(self.shared_data, self)
@@ -58,7 +61,7 @@ class MainWindow(qt.QMainWindow):
         central_widget.setLayout(v_box)
 
     def reloadGallery(self, newDir: str):
-        print("new dir emitted:", newDir)
+        logg.info(f"new dir emitted: {newDir}")
         # take the old gallery out of the layout
         layout = self.centralWidget().layout()
         layout.removeWidget(self.gallery)
@@ -72,17 +75,17 @@ class MainWindow(qt.QMainWindow):
 
 
 def load_index():
-    print("Loading index...")
+    logg.info("Loading index...")
     shared_data = SharedData()
 
     try:
         if shared_data.data["wallpapers_dir"]:
             xdgthumbails.call_xdg(shared_data.data["wallpapers_dir"])
             xdgthumbails.ligma(shared_data.data["wallpapers_dir"])
-        print("Loading complete!")
+        logg.info("Loading complete!")
 
     except FileNotFoundError as e:
-        print(e, " >> select a new source dir wallpapers_dir <<")
+        logg.error(f"{e} >> select a new source dir wallpapers_dir <<")
 
 
 def main():
@@ -97,7 +100,7 @@ def main():
     # check for preset DPI
     with open(os.path.join(ROOT_DIR, "agemo.json"), "r") as f:
         data = json.load(f)
-        # print('data[dpi]:',data['dpi'])
+        logg.debug(f"data[dpi]: {data['dpi']}")
 
     if data["dpi"]:
         os.environ["QT_SCALE_FACTOR"] = str(data["dpi"])

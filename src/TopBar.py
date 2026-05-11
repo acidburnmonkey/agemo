@@ -13,9 +13,11 @@ from PyQt6.QtCore import QSize, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QIcon, QPixmap
 
 import xdgthumbails
-from constants import ASSETS_DIR, GLOBAL_VERSION
+from constants import ASSETS_DIR, GLOBAL_VERSION, get_logger
 from settings import SettingsWindow
 from SharedData import SharedData
+
+logg = get_logger(__name__)
 
 
 # returns string as tuple
@@ -28,16 +30,14 @@ class UpdateChecker(QThread):
 
     def run(self):
         try:
-            res = requests.get(
-                "https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5
-            )
+            res = requests.get("https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5)
             if res.ok:
                 data = res.json()[0].get("name")
                 self.finished.emit(data)
             else:
                 self.finished.emit("N/A")
         except Exception as e:
-            print(f"Exception in thread: {e}")
+            logg.info(f"Exception in thread: {e}")
             self.finished.emit("Error")
 
 
@@ -47,9 +47,7 @@ class TopBar(qt.QWidget):
     directoryChanged = pyqtSignal(str)
     checkOnline = pyqtSignal(str)
 
-    def __init__(
-        self, shared_data: SharedData | None = None, parent: qt.QWidget | None = None
-    ):
+    def __init__(self, shared_data: SharedData | None = None, parent: qt.QWidget | None = None):
         super().__init__(parent)
 
         self.shared_data: SharedData | None = shared_data
@@ -116,9 +114,7 @@ class TopBar(qt.QWidget):
             self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
-            with open(
-                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
-            ) as f:
+            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # emit signal to gallery
@@ -126,7 +122,7 @@ class TopBar(qt.QWidget):
 
             # fisrst time run here
             if (not bool(self.prev_wallpapers_dir)) and wallpapers_dir:
-                print("First time run:", not bool(self.prev_wallpapers_dir))
+                logg.info(f"First time run: {not bool(self.prev_wallpapers_dir)}")
                 xdgthumbails.call_xdg(self.shared_data.data["wallpapers_dir"])
                 xdgthumbails.ligma(self.shared_data.data["wallpapers_dir"])
 
@@ -134,12 +130,9 @@ class TopBar(qt.QWidget):
             self.directoryChanged.emit(wallpapers_dir)
 
             ## Debug
-            print("Total images on wallpaper dir:", total)
-            print("wallpapers_dir:", wallpapers_dir)
-            print(
-                "shared_data['wallpapers_dir'] :",
-                self.shared_data.data["wallpapers_dir"],
-            )
+            logg.debug(f"Total images on wallpaper dir: {total}")
+            logg.debug(f"wallpapers_dir: {wallpapers_dir}")
+            logg.debug(f"shared_data['wallpapers_dir'] : {self.shared_data.data['wallpapers_dir']}")
 
     # About window : dwindow
     def show_about(self):
@@ -184,11 +177,11 @@ class TopBar(qt.QWidget):
         self.update_worker: UpdateChecker = UpdateChecker()
         self.update_worker.finished.connect(self.update_version_display)
         self.update_worker.start()
-        print("Checking for Updates")
+        logg.info("Checking for Updates")
 
     def update_version_display(self, version: str):
         self.upstream_version = version
-        print("self.upstream_version: ", self.upstream_version)
+        logg.info(f"self.upstream_version:  {self.upstream_version}")
 
         if version_to_tuple(self.upstream_version) > version_to_tuple(GLOBAL_VERSION):
             self.version_label.setStyleSheet("color: green;")

@@ -2,7 +2,9 @@ import json
 import os
 import subprocess
 
-from constants import ROOT_DIR
+from constants import ROOT_DIR, get_logger
+
+logg = get_logger(__name__)
 
 
 class SharedData:
@@ -38,19 +40,21 @@ class SharedData:
                 return {**default_settings, **file_data}
 
         except FileNotFoundError:
-            print("Error: Configuration file not found. Creating agemo.json")
+            logg.error("Error: Configuration file not found. Creating agemo.json")
 
             with open(os.path.join(ROOT_DIR, "agemo.json"), "w") as f:
                 json.dump(default_settings, f, indent=4)
                 return default_settings
 
         except json.JSONDecodeError:
-            print("Error: Malformed JSON in.")
+            logg.error("Error: Malformed JSON in.")
             return {}
 
     def check_monitors(self):
         try:
-            hypr_ctl = subprocess.run(["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True)
+            hypr_ctl = subprocess.run(
+                ["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True
+            )
             hold = json.loads(hypr_ctl.stdout)
 
             # returns list of monitor names
@@ -62,4 +66,4 @@ class SharedData:
                 json.dump(self.data, f, indent=4)
 
         except Exception as e:
-            print(e)
+            logg.error(e)

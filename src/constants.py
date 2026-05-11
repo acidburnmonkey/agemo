@@ -1,7 +1,14 @@
 from pathlib import Path
+import logging
 
 # check if the path is my dev env or normal .local
 dev_mode = (Path(__file__).parent.parent / ".git").exists()
+
+
+def get_logger(name: str) -> logging.Logger:
+    formatter = " %(levelname)s | %(funcName)s| %(message)s"
+    logging.basicConfig(format=formatter, level=logging.INFO)
+    return logging.getLogger(name)
 
 
 def get_root():
