@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 # check if the path is my dev env or normal .local
 dev_mode = (Path(__file__).parent.parent / ".git").exists()
 
@@ -17,7 +16,7 @@ if dev_mode:
     print("Running DEV")
 
 
-__version__ = '2.6.0'
+__version__ = "2.6.0"
 # returning strings for old os module
 ROOT_DIR = get_root()
 ASSETS_DIR = Path((ROOT_DIR)).parent / "assets"

@@ -6,19 +6,20 @@
 import json
 import os
 import sys
-import requests
 
 import PyQt6.QtWidgets as qt
-from PyQt6.QtCore import QSize, Qt, pyqtSignal, QThread
+import requests
+from PyQt6.QtCore import QSize, Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QIcon, QPixmap
 
 import xdgthumbails
 from constants import ASSETS_DIR, GLOBAL_VERSION
 from settings import SettingsWindow
+from SharedData import SharedData
 
 
 # returns string as tuple
-def version_to_tuple(version):
+def version_to_tuple(version: str) -> tuple[int, ...]:
     return tuple(map(int, version.strip("v").split(".")))
 
 
@@ -46,11 +47,13 @@ class TopBar(qt.QWidget):
     directoryChanged = pyqtSignal(str)
     checkOnline = pyqtSignal(str)
 
-    def __init__(self, shared_data=None, parent=None):
+    def __init__(
+        self, shared_data: SharedData | None = None, parent: qt.QWidget | None = None
+    ):
         super().__init__(parent)
 
-        self.shared_data = shared_data
-        self.upstream_version = None
+        self.shared_data: SharedData | None = shared_data
+        self.upstream_version: str | None = None
 
         # Buttons
         self.close_button = qt.QPushButton()
@@ -94,7 +97,7 @@ class TopBar(qt.QWidget):
 
     ## open SettingsWindow
     def open_settings(self):
-        self.settings_window = SettingsWindow(self.shared_data)
+        self.settings_window: SettingsWindow = SettingsWindow(self.shared_data)
         self.settings_window.show()
 
     # wallpapers dir
@@ -141,7 +144,7 @@ class TopBar(qt.QWidget):
     # About window : dwindow
     def show_about(self):
         self.check_updates()
-        self.dwindow = qt.QDialog(self)
+        self.dwindow: qt.QDialog = qt.QDialog(self)
         self.dwindow.setWindowTitle("About")
         abox = qt.QVBoxLayout(self.dwindow)
 
@@ -158,7 +161,7 @@ class TopBar(qt.QWidget):
 
         # link
         description = qt.QLabel("https://github.com/acidburnmonkey/agemo", self.dwindow)
-        self.version_label = qt.QLabel(GLOBAL_VERSION, self.dwindow)
+        self.version_label: qt.QLabel = qt.QLabel(GLOBAL_VERSION, self.dwindow)
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         abox.addWidget(description)
         abox.addWidget(self.version_label)
@@ -178,12 +181,12 @@ class TopBar(qt.QWidget):
         sys.exit()
 
     def check_updates(self):
-        self.update_worker = UpdateChecker()
+        self.update_worker: UpdateChecker = UpdateChecker()
         self.update_worker.finished.connect(self.update_version_display)
         self.update_worker.start()
         print("Checking for Updates")
 
-    def update_version_display(self, version):
+    def update_version_display(self, version: str):
         self.upstream_version = version
         print("self.upstream_version: ", self.upstream_version)
 

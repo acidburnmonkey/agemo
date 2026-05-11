@@ -1,23 +1,26 @@
+from __future__ import annotations
+
 # pyright: reportOptionalMemberAccess=none
 #
 #  https://github.com/acidburnmonkey
-
 import json
 import os
+from typing import cast
 
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QPixmap
+from PyQt6.QtGui import QColor, QMouseEvent, QPixmap, QResizeEvent
 
 from constants import ROOT_DIR
+from SharedData import SharedData
 
 
 ## Gallery
 class Gallery(qt.QWidget):
-    def __init__(self, shared_data):
+    def __init__(self, shared_data: SharedData):
         super().__init__()
-        self.shared_data = shared_data
-        self.selected_label = None
+        self.shared_data: SharedData = shared_data
+        self.selected_label: ClickableLabel | None = None
 
         # Create the scroll area and its inner widget
         self.scroll_area = qt.QScrollArea(self)
@@ -44,6 +47,7 @@ class Gallery(qt.QWidget):
         main_layout.addWidget(self.scroll_area)
 
         self.setLayout(main_layout)
+        self.labels: list[ClickableLabel] = []
         if self.shared_data.data["wallpapers_dir"]:
             self.load_gallery()
 
@@ -58,10 +62,7 @@ class Gallery(qt.QWidget):
             with open(os.path.join(ROOT_DIR, "xdgcache.json"), "w") as f:
                 f.write("[]")
 
-        for i, item in enumerate(thumbnails):
-            # print(i,item['thumbnail'])
-
-            # each square
+        for item in thumbnails:
             imageLabel = ClickableLabel()
             imageLabel.setPixmap(QPixmap(item["thumbnail"]))
             imageLabel.setProperty("image", item["image"])
@@ -77,13 +78,23 @@ class Gallery(qt.QWidget):
             shadow.setColor(QColor(0, 0, 0, 150))
             imageLabel.setGraphicsEffect(shadow)
 
-            # 5 columns
-            row, col = divmod(i, 10)
-            imageLabel.setProperty("coordinates", (row, col))
-            self.grid_layout.addWidget(imageLabel, row, col)
+            self.labels.append(imageLabel)
+
+        self.reflow()
+
+    # calculates rows and columns to display
+    def reflow(self):
+        columns = max(1, self.width() // 180)
+        for i, lbl in enumerate(self.labels):
+            row, col = divmod(i, columns)
+            self.grid_layout.addWidget(lbl, row, col)
+
+    def resizeEvent(self, event: QResizeEvent):  # pyright: ignore
+        self.reflow()
+        super().resizeEvent(event)
 
     def getClick(self):
-        lbl = self.sender()
+        lbl = cast(ClickableLabel, self.sender())
 
         # clear the old border
         if self.selected_label and self.selected_label is not lbl:
@@ -105,7 +116,7 @@ class ClickableLabel(qt.QLabel):
 
     clicked = pyqtSignal()
 
-    def mouseReleaseEvent(self, event):
+    def mouseReleaseEvent(self, event: QMouseEvent):  # pyright: ignore
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit()
         super().mouseReleaseEvent(event)

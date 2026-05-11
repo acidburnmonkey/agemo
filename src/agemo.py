@@ -9,14 +9,16 @@ import os
 import sys
 
 import PyQt6.QtWidgets as qt
+from PyQt6.QtGui import QResizeEvent
+
 import helper
 import xdgthumbails
 from BottomBar import BottomBar
 from constants import ROOT_DIR
+from Gallery import Gallery
 from SharedData import SharedData
 from splashWindow import SplashScreen
 from TopBar import TopBar
-from Gallery import Gallery
 
 
 # Main Window
@@ -25,15 +27,13 @@ class MainWindow(qt.QMainWindow):
         super().__init__()
 
         # shared data
-        self.shared_data = SharedData()
+        self.shared_data: SharedData = SharedData()
 
-        print(
-            "shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"]
-        )
+        print("shared_data['wallpapers_dir'] :", self.shared_data.data["wallpapers_dir"])
 
-        self.bottom_bar = BottomBar(self.shared_data, self)
-        self.top_bar = TopBar(self.shared_data, self)
-        self.gallery = Gallery(self.shared_data)
+        self.bottom_bar: BottomBar = BottomBar(self.shared_data, self)
+        self.top_bar: TopBar = TopBar(self.shared_data, self)
+        self.gallery: Gallery = Gallery(self.shared_data)
 
         self.top_bar.directoryChanged.connect(self.reloadGallery)
 
@@ -57,7 +57,7 @@ class MainWindow(qt.QMainWindow):
 
         central_widget.setLayout(v_box)
 
-    def reloadGallery(self, newDir):
+    def reloadGallery(self, newDir: str):
         print("new dir emitted:", newDir)
         # take the old gallery out of the layout
         layout = self.centralWidget().layout()
@@ -68,7 +68,7 @@ class MainWindow(qt.QMainWindow):
 
         self.gallery.deleteLater()
         self.gallery = Gallery(self.shared_data)
-        layout.insertWidget(1, self.gallery, stretch=1)
+        layout.insertWidget(1, self.gallery, stretch=1)  # pyright: ignore
 
 
 def load_index():

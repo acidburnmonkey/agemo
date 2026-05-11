@@ -1,11 +1,13 @@
-import os
-import subprocess
-import json
-import shutil
 import hashlib
-from PIL import Image
+import json
+import os
+import shutil
+import subprocess
 import urllib.parse
 from datetime import datetime
+
+from PIL import Image
+
 from constants import CACHE_FILE
 
 THUMB_ROOT = os.path.expanduser("~/.cache/thumbnails")

@@ -1,6 +1,7 @@
+import json
 import os
 import subprocess
-import json
+
 from constants import ROOT_DIR
 
 
@@ -49,9 +50,7 @@ class SharedData:
 
     def check_monitors(self):
         try:
-            hypr_ctl = subprocess.run(
-                ["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True
-            )
+            hypr_ctl = subprocess.run(["hyprctl", "monitors", "-j"], stdout=subprocess.PIPE, text=True)
             hold = json.loads(hypr_ctl.stdout)
 
             # returns list of monitor names

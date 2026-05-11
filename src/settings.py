@@ -12,15 +12,16 @@ from PyQt6.QtCore import QProcess, QProcessEnvironment, QSize, Qt
 from PyQt6.QtGui import QIcon
 
 from constants import ASSETS_DIR, ROOT_DIR
+from SharedData import SharedData
 
 
 class SettingsWindow(qt.QWidget):
     """Settings Window"""
 
-    def __init__(self, shared_data, parent=None):
+    def __init__(self, shared_data: SharedData, parent: qt.QWidget | None = None):
         super().__init__(parent)
 
-        self.shared_data = shared_data
+        self.shared_data: SharedData = shared_data
 
         # Widgets
         self.close_button = qt.QPushButton()
@@ -55,7 +56,7 @@ class SettingsWindow(qt.QWidget):
 
         self.initUI()
 
-        self.scaleFactor = os.environ.get("QT_SCALE_FACTOR")
+        self.scaleFactor: str | None = os.environ.get("QT_SCALE_FACTOR")
         if self.scaleFactor:
             self.label.setText(f"""You already have scaling set on environment :
                                $QT_SCALE_FACTOR: {self.scaleFactor}
@@ -157,13 +158,13 @@ class SettingsWindow(qt.QWidget):
             ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
-    def slide(self, i):
+    def slide(self, i: int):
         val = 1.0 + i * 0.5
         self.label.setText(f"Dpi :{val * 100}%")
         self.shared_data.data["dpi"] = str(val)  # it takes a string
         print("self.uiScaling:", self.shared_data.data["dpi"])
 
-    def checkorNot(self, state):
+    def checkorNot(self, state: int):
         if state == 0:
             self.slider.setDisabled(True)
             self.dpiLabel.setText("Scale UI")

@@ -10,22 +10,23 @@ import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt
 
 from HyprParser import HyprpaperWrite
+from SharedData import SharedData
 
 
 # bottom bar
 class BottomBar(qt.QWidget):
-    def __init__(self, shared_data, parent=None):
+    def __init__(self, shared_data: SharedData, parent: qt.QWidget | None = None):
         super().__init__(parent)
 
-        self.monitors = shared_data.data["monitors"]
-        self.shared_data = shared_data
+        self.monitors: list[str] = shared_data.data["monitors"]
+        self.shared_data: SharedData = shared_data
 
         # buttons
         self.applyButton = qt.QPushButton("Apply")
         self.applyButton.clicked.connect(self.apply)
         self.monitors_select = qt.QComboBox()
         self.monitors_select.addItems(self.monitors)
-        self.current_monitor = self.monitors[0]
+        self.current_monitor: str = self.monitors[0]
 
         # events
         self.monitors_select.currentTextChanged.connect(self.select_monitor)
@@ -56,7 +57,7 @@ class BottomBar(qt.QWidget):
         self.monitors_select.setFixedSize(100, 20)  # W , H
         self.monitors_select.setObjectName("monitors_select")
 
-    def select_monitor(self, selected):
+    def select_monitor(self, selected: str):
         self.current_monitor = selected
         print("selected > self.current_monitor:", self.current_monitor)
 
