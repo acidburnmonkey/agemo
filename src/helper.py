@@ -1,3 +1,5 @@
+from typing import override
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 
@@ -10,6 +12,7 @@ class WorkerThread(QThread):
         super().__init__()
         self.func = func
 
+    @override
     def run(self):
         self.func()
         self.finished.emit()

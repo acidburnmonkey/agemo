@@ -6,6 +6,7 @@
 import json
 import os
 import sys
+from typing import override
 
 import PyQt6.QtWidgets as qt
 import requests
@@ -28,6 +29,7 @@ def version_to_tuple(version: str) -> tuple[int, ...]:
 class UpdateChecker(QThread):
     finished = pyqtSignal(str)
 
+    @override
     def run(self):
         try:
             res = requests.get("https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5)

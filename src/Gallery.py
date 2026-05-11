@@ -5,7 +5,7 @@ from __future__ import annotations
 #  https://github.com/acidburnmonkey
 import json
 import os
-from typing import cast
+from typing import cast, override
 
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -91,6 +91,7 @@ class Gallery(qt.QWidget):
             row, col = divmod(i, columns)
             self.grid_layout.addWidget(lbl, row, col)
 
+    @override
     def resizeEvent(self, event: QResizeEvent):  # pyright: ignore
         self.reflow()
         super().resizeEvent(event)
@@ -118,6 +119,7 @@ class ClickableLabel(qt.QLabel):
 
     clicked = pyqtSignal()
 
+    @override
     def mouseReleaseEvent(self, event: QMouseEvent):  # pyright: ignore
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit()
