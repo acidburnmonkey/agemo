@@ -32,7 +32,9 @@ class UpdateChecker(QThread):
     @override
     def run(self):
         try:
-            res = requests.get("https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5)
+            res = requests.get(
+                "https://api.github.com/repos/acidburnmonkey/agemo/tags", timeout=5
+            )
             if res.ok:
                 data = res.json()[0].get("name")
                 self.finished.emit(data)
@@ -49,7 +51,9 @@ class TopBar(qt.QWidget):
     directoryChanged = pyqtSignal(str)
     checkOnline = pyqtSignal(str)
 
-    def __init__(self, shared_data: SharedData | None = None, parent: qt.QWidget | None = None):
+    def __init__(
+        self, shared_data: SharedData | None = None, parent: qt.QWidget | None = None
+    ):
         super().__init__(parent)
 
         self.shared_data: SharedData | None = shared_data
@@ -116,7 +120,9 @@ class TopBar(qt.QWidget):
             self.shared_data.data["wallpapers_dir"] = wallpapers_dir
             total = len(os.listdir(wallpapers_dir))
 
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # emit signal to gallery
@@ -134,7 +140,9 @@ class TopBar(qt.QWidget):
             ## Debug
             logg.debug(f"Total images on wallpaper dir: {total}")
             logg.debug(f"wallpapers_dir: {wallpapers_dir}")
-            logg.debug(f"shared_data['wallpapers_dir'] : {self.shared_data.data['wallpapers_dir']}")
+            logg.debug(
+                f"shared_data['wallpapers_dir'] : {self.shared_data.data['wallpapers_dir']}"
+            )
 
     # About window : dwindow
     def show_about(self):

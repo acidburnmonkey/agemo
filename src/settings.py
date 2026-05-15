@@ -14,7 +14,6 @@ from PyQt6.QtGui import QIcon
 from constants import ASSETS_DIR, ROOT_DIR, get_logger
 from SharedData import SharedData
 
-
 logg = get_logger(__name__)
 
 
@@ -97,7 +96,9 @@ class SettingsWindow(qt.QWidget):
         self.settingsLayout.addWidget(self.label, 0, 0)
         self.settingsLayout.addWidget(self.checkBox, 1, 0, 1, 1)
         self.settingsLayout.addWidget(self.dpiLabel, 1, 1, 1, 1)
-        self.settingsLayout.addWidget(self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter)
+        self.settingsLayout.addWidget(
+            self.slider, 2, 0, 1, 2, alignment=Qt.AlignmentFlag.AlignHCenter
+        )
         self.settingsLayout.addWidget(
             self.buttonScale,
             3,
@@ -127,7 +128,9 @@ class SettingsWindow(qt.QWidget):
     def scaleNow(self):
         if self.shared_data.data["dpi"] and self.checkBox.isChecked():
             # write to config file
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
             # build a QProcessEnvironment
@@ -152,7 +155,9 @@ class SettingsWindow(qt.QWidget):
 
         elif not self.checkBox.isChecked():
             self.shared_data.data["dpi"] = None
-            with open(os.path.join(self.shared_data.script_path, "agemo.json"), "w") as f:
+            with open(
+                os.path.join(self.shared_data.script_path, "agemo.json"), "w"
+            ) as f:
                 json.dump(self.shared_data.data, f, indent=4)
 
     def slide(self, i: int):
