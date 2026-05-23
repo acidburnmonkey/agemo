@@ -9,8 +9,11 @@ import time
 import PyQt6.QtWidgets as qt
 from PyQt6.QtCore import Qt
 
+from constants import get_logger
 from HyprParser import HyprpaperWrite
 from SharedData import SharedData
+
+logger = get_logger(__name__)
 
 
 # bottom bar
@@ -59,14 +62,14 @@ class BottomBar(qt.QWidget):
 
     def select_monitor(self, selected: str):
         self.current_monitor = selected
-        print("selected > self.current_monitor:", self.current_monitor)
+        logger.info(f"selected > self.current_monitor: {self.current_monitor}")
 
     def apply(self):
         writer = HyprpaperWrite()
 
         if self.shared_data.selectedImage:
-            print("applying to :", self.current_monitor)
-            print("Image selected : ", self.shared_data.selectedImage)
+            logger.info(f"applying to : {self.current_monitor}")
+            logger.info(f"Image selected : {self.shared_data.selectedImage}")
 
             try:
                 writer.hypr_write(self.shared_data.selectedImage, self.current_monitor)
@@ -74,4 +77,4 @@ class BottomBar(qt.QWidget):
                 time.sleep(1)
                 subprocess.Popen(["hyprpaper"])
             except FileNotFoundError:
-                print("⛔ Hyprpaper is not installed")
+                logger.error("⛔ Hyprpaper is not installed")

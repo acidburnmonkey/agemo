@@ -5,13 +5,16 @@ import shutil
 import subprocess
 import urllib.parse
 from datetime import datetime
+from pathlib import Path
 
 from PIL import Image
 
-from constants import CACHE_FILE
+from constants import CACHE_FILE, get_logger
 
 THUMB_ROOT = os.path.expanduser("~/.cache/thumbnails")
 SIZES = ("normal", "large", "x-large", "xx-large")
+
+logger = get_logger(__name__)
 
 
 class NoThubnailerError(Exception):
@@ -42,9 +45,9 @@ def find_thumbnail(name: str) -> str:
     return ""
 
 
-def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
+def ligma(wallpapers_dir: str, cache_file: Path = CACHE_FILE):
     #  load existing cache
-    print("Loading Cache")
+    logger.info("Loading Cache")
 
     if os.path.exists(cache_file):
         try:
@@ -88,13 +91,13 @@ def ligma(wallpapers_dir: str, cache_file: str = CACHE_FILE):
 
     # if nothing changed return
     if not changed and len(new_entries) == len(existing):
-        print("Cache already up to date.")
+        logger.info("Cache already up to date.")
         return
 
     # write updated cache
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(new_entries, f, indent=4, ensure_ascii=False)
-    print(f"Cache updated: {len(new_entries)} entries.")
+    logger.info(f"Cache updated: {len(new_entries)} entries.")
 
 
 # force populate thubnails
@@ -102,11 +105,12 @@ def call_xdg(img_dir: str, size: int = 256):
     try:
         thumbnailer = get_thumbnailer()
         if thumbnailer is None:
+            logger.critical("No Thubnailer Error")
             raise NoThubnailerError
     except NoThubnailerError:
         exit(1)
 
-    print("Generating thumbnails using:", thumbnailer)
+    logger.debug("Generating thumbnails using:", thumbnailer)
 
     cache_dir = os.path.expanduser("~/.cache/thumbnails/large/")
     os.makedirs(cache_dir, exist_ok=True)
@@ -121,8 +125,7 @@ def call_xdg(img_dir: str, size: int = 256):
         name = hashlib.md5(uri.encode("utf-8")).hexdigest() + ".png"
         out = os.path.join(cache_dir, name)
 
-        # DEBUG
-        # print("Out:", out)
+        logger.debug(f"Out: {out}")
 
         # only thumbnail if missing
         if not os.path.exists(out):
@@ -147,7 +150,7 @@ def call_xdg(img_dir: str, size: int = 256):
                 )
 
 
-def get_thumbnailer():
+def get_thumbnailer() -> str | bool:
     if shutil.which("gdk-pixbuf-thumbnailer"):
         return "gdk-pixbuf-thumbnailer"
 
